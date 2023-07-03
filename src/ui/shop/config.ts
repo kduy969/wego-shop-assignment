@@ -1,4 +1,4 @@
 export const ShopConfig = {
-  InitialTake: 20,
-  TakeOnLoadMore: 20,
+  InitialTake: 10,
+  TakeOnLoadMore: 10,
 };

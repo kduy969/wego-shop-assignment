@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TCategory, TProduct } from "../../../api/types";
 import { Service } from "../../../service";
 import { usePrevious } from "../../../hooks/usePrevious";
@@ -6,7 +6,7 @@ import { usePrevious } from "../../../hooks/usePrevious";
 type TLoadingBy = "takeMore" | "category" | "filter" | "initial";
 
 export const useProductsByRange = (
-  start: number,
+  skip: number,
   take: number,
   filter: string | undefined,
   categoryId: string | undefined
@@ -19,10 +19,16 @@ export const useProductsByRange = (
   const previousTake = usePrevious(take);
   const previousCategoryId = usePrevious(categoryId);
   const previousFilter = usePrevious(filter);
+
+  // save the latest running job id -> ignore job result if jobId !== latestJobId
+  const latestJobId = useRef<number>(0);
+
   useEffect(() => {
     (async () => {
+      const myJobId = latestJobId.current + 1;
+      latestJobId.current = myJobId;
       try {
-        setLoadingBy(
+        const loadingByTemp =
           !previousTake && !previousCategoryId && !previousFilter // no previous data -> initial loading
             ? "initial"
             : (previousTake || 0) < take // when user what to take more item
@@ -31,31 +37,42 @@ export const useProductsByRange = (
             ? "category"
             : previousFilter !== filter // when user change filter
             ? "filter"
-            : "initial"
-        );
+            : "initial";
+        setLoadingBy(loadingByTemp);
         setLoading(true);
-        const { products, total } = await Service.API.getProductsByRange(
-          start,
-          take,
-          filter,
-          categoryId
-        );
-        setProducts(products);
-        setTotal(total);
-        console.log("load product by range", {
-          start,
-          take,
-          filter,
-          categoryId,
-          total,
-          length: products.length,
-        });
+        if (loadingBy === "takeMore") {
+          // only load new items from last position
+          const { products: additionalItems, total: newTotal } =
+            await Service.API.getProductsByRange(
+              previousTake || 0,
+              take - (previousTake || 0),
+              filter,
+              categoryId
+            );
+          if (myJobId === latestJobId.current) {
+            setProducts(products.concat(additionalItems));
+            setTotal(newTotal);
+          }
+        } else {
+          // load from beginning
+          const { products: newItems, total: newTotal } =
+            await Service.API.getProductsByRange(
+              skip,
+              take,
+              filter,
+              categoryId
+            );
+          if (myJobId === latestJobId.current) {
+            setProducts(newItems);
+            setTotal(newTotal);
+          }
+        }
       } catch (e) {
-        setError("Cannot load products");
+        if (myJobId === latestJobId.current) setError("Cannot load products");
       } finally {
-        setLoading(false);
+        if (myJobId === latestJobId.current) setLoading(false);
       }
     })();
-  }, [start, take, filter, categoryId]);
+  }, [skip, take, filter, categoryId]);
   return [products, total, error, loading, loadingBy];
 };

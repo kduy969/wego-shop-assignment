@@ -82,10 +82,13 @@
 }
 
 .bottomBox .title {
-  display: flex;
   font-size: 0.9rem;
   font-weight: bold;
   color: $text-color;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .infoRow {

@@ -8,7 +8,7 @@ export class FakeApi implements ApiInterface {
   }
 
   async getProductsByRange(
-    start: number,
+    skip: number,
     take: number,
     filter: string | undefined,
     categoryId: string | undefined
@@ -34,7 +34,7 @@ export class FakeApi implements ApiInterface {
 
     // return result base on filtered list
     return {
-      products: filteredProducts.slice(start, start + take),
+      products: filteredProducts.slice(skip, skip + take),
       total: filteredProducts.length,
     };
   }
