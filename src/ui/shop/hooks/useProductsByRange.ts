@@ -24,6 +24,14 @@ export const useProductsByRange = (
         );
         setProducts(products);
         setTotal(total);
+        console.log("load product by range", {
+          start,
+          take,
+          filter,
+          categoryId,
+          total,
+          length: products.length,
+        });
       } catch (e) {
         setError("Cannot load products");
       } finally {

@@ -1,0 +1,64 @@
+@import './style.scss';
+
+.container {
+  display: flex;
+  width: calc(100vw - 40px);
+  height: calc(100vh - 40px);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 20px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  background: white;
+}
+
+.searchBarBox {
+  display: flex;
+  margin-top: 20px;
+}
+
+.categoryBox {
+  max-width: 100%;
+  margin-top: 20px;
+  width: 500px;
+  display: flex;
+}
+
+.productsBox {
+  margin-top: 20px;
+  align-self: stretch;
+  display: flex;
+}
+
+.loadMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  align-self: center;
+  border-radius: 10px;
+  border: 2px solid $accent-color;
+
+  color: $text-color;
+  font-weight: bold;
+  font-size: 0.7rem;
+  padding: 6px 20px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  opacity: 0.85;
+}
+
+.loadMore:hover {
+  opacity: 1;
+}
+
+.noMore {
+  display: flex;
+  margin-top: 20px;
+  align-self: center;
+  color: $text-color;
+  font-size: 0.9rem;
+}
+
+

@@ -1,0 +1,10 @@
+.container {
+  display: flex;
+  width: 200px;
+  height: 150px;
+  background: white;
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.6);
+  margin: 4px;
+  border-radius: 10px;
+  flex-grow: 1; // grow to fill any available space in parent
+}

@@ -1,0 +1,39 @@
+@import "../style";
+.container {
+    display: flex;
+    max-width: 100%;
+}
+
+.itemsBox {
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    border: 1px $accent-color solid;
+    border-radius: 6px;
+    margin-right: 10px;
+}
+
+.item {
+    padding: 6px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $text-color;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.item.selected {
+    font-weight: bold;
+    background: $accent-color;
+}
+
+.clearSelected {
+    color: $accent-color;
+    font-weight: bold;
+    font-size: 0.8rem;
+    display: flex;
+}
