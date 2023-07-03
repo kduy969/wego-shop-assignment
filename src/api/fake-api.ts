@@ -26,5 +26,4 @@ export class FakeApi implements ApiInterface{
       total: filteredProducts.length,
     }
   }
-
 }
