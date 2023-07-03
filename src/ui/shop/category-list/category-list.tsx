@@ -41,7 +41,7 @@ const CategoryList = ({
             }}
             className={classNames(css.item, css.loading)}
             onClick={() => onSelect(undefined)}
-            key={"All"}
+            key={"Loading"}
           >
             Text
             <LoadingAnimation className={css.loadingIcon} />
@@ -54,12 +54,16 @@ const CategoryList = ({
               }}
               className={classNames(
                 css.item,
-                selectedId === undefined && css.selected
+                selectedId === undefined && css.selected,
+                selectedId === undefined && loadingSelected && css.loading
               )}
               onClick={() => onSelect(undefined)}
               key={"All"}
             >
               All
+              {selectedId === undefined && loadingSelected && (
+                <LoadingAnimation className={css.loadingIcon} />
+              )}
             </div>
             {items.map((item) => {
               const selected = selectedId === item.id;
