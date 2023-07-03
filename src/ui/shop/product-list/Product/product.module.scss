@@ -1,10 +1,69 @@
+@import '../../style';
+
 .container {
   display: flex;
   width: 200px;
-  height: 150px;
   background: white;
   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.6);
   margin: 4px;
   border-radius: 10px;
+  overflow: hidden;
   flex-grow: 1; // grow to fill any available space in parent
+
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.topBox {
+  display: flex;
+  position: relative;
+  background: green;
+
+}
+
+.topBox .image {
+  display: flex;
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  background: gray;
+}
+
+.topBox .statusIcon {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 4px 10px;
+  color: white;
+  font-size: 0.8rem;
+  border-radius: 0px 0px 8px 0px;
+}
+
+.bottomBox {
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.bottomBox .title {
+  display: flex;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: $text-color;
+}
+
+.infoRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.infoItem {
+  margin: 2px 2px;
 }

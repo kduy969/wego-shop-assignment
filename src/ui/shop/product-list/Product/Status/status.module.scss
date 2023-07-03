@@ -1,0 +1,18 @@
+@import "../../../style";
+
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+
+.text {
+  display: flex;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #17bc8c;
+}

@@ -1,0 +1,25 @@
+@import "../../../style";
+
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+
+.icon {
+  transform: translateY(-2px);
+  display: flex;
+  font-size: 0.8rem;
+  color: $text-color;
+}
+
+.rate {
+  display: flex;
+  font-size: 0.8rem;
+  color: $text-color;
+  margin-left: 2px;
+}
