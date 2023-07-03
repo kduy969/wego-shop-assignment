@@ -3,6 +3,9 @@
     display: flex;
     max-width: 100%;
 }
+.container.disabled {
+    pointer-events: none;
+}
 
 .itemsBox {
     display: flex;
@@ -24,6 +27,15 @@
     color: $text-color;
     font-size: 0.9rem;
     cursor: pointer;
+    position: relative;
+}
+
+.item.loading {
+    color: transparent;
+}
+
+.loadingIcon {
+    position: absolute;
 }
 
 .item.selected {

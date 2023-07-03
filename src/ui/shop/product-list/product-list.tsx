@@ -11,6 +11,29 @@ type Props = ViewStyle & {
 };
 
 const ProductList = ({ items, loading, style, className }: Props) => {
+  const showPlaceHolder = loading && items.length === 0;
+  const noItems = items.length === 0;
+
+  if (showPlaceHolder)
+    return (
+      <div className={classNames(css.loadingPlaceHolder, className)}>
+        <span className={classNames(css.icon, "material-icons")}>
+          inventory_2
+        </span>
+        <div className={css.text}>Items are being loading....</div>
+      </div>
+    );
+
+  if (noItems)
+    return (
+      <div className={classNames(css.loadingPlaceHolder, className)}>
+        <span className={classNames(css.icon, "material-icons")}>
+          inventory_2
+        </span>
+        <div className={css.text}>No item found.</div>
+      </div>
+    );
+
   return (
     <div style={style} className={classNames(css.container, className)}>
       {items.map((i) => (

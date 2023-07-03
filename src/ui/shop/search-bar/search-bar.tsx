@@ -1,15 +1,17 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useImperativeHandle, useState } from "react";
 import css from "./search-bar.module.css";
 import { ViewStyle } from "../../base-types/view-style";
 import classNames from "classnames";
 import { useKeyPress } from "../../../hooks/useKeyPress";
 import { KeyboardKeys } from "../../../hooks/key-codes";
+import LoadingAnimation from "../loading-animation/loading-animation";
 
 type Props = ViewStyle & {
   onSubmit: (text: string) => void; // should be memorized
+  loading: boolean; // filter text is being submitting
 };
 
-const SearchBar = ({ className, style, onSubmit }: Props) => {
+const SearchBar = ({ className, style, onSubmit, loading }: Props) => {
   const [text, setText] = useState<string>("");
   const [submitted, setSubmitted] = useState(false);
   const onSubmitCB = useCallback(() => {
@@ -17,9 +19,16 @@ const SearchBar = ({ className, style, onSubmit }: Props) => {
     setSubmitted(true);
   }, [text, onSubmit]);
   useKeyPress(KeyboardKeys.Enter, onSubmitCB);
-
+  // useImperativeHandle(ref, () => {
+  //   return {
+  //     // ... your methods ...
+  //   };
+  // }, []);
   return (
-    <div style={style} className={classNames(css.container, className)}>
+    <div
+      style={style}
+      className={classNames(css.container, className, loading && css.disabled)}
+    >
       <span className={classNames("material-icons", css.icon)}>search</span>
       <input
         value={text}
@@ -28,7 +37,7 @@ const SearchBar = ({ className, style, onSubmit }: Props) => {
           setSubmitted(false);
           setText(e.target.value);
         }}
-        placeholder={"Search by product name"}
+        placeholder={"Search by product or restaurant name"}
         className={css.input}
       />
       <div
@@ -38,17 +47,21 @@ const SearchBar = ({ className, style, onSubmit }: Props) => {
         <div className={css.text}>Apply search</div>
         <div className={css.hint}>Press Enter</div>
       </div>
-      {!!text && (
-        <span
-          className={classNames("material-icons", css.clear)}
-          onClick={() => {
-            setText("");
-            onSubmit("");
-            setSubmitted(true);
-          }}
-        >
-          clear
-        </span>
+      {loading ? (
+        <LoadingAnimation className={css.loading} />
+      ) : (
+        !!text && (
+          <span
+            className={classNames("material-icons", css.clear)}
+            onClick={() => {
+              setText("");
+              onSubmit("");
+              setSubmitted(true);
+            }}
+          >
+            clear
+          </span>
+        )
       )}
     </div>
   );

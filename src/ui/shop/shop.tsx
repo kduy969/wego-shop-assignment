@@ -12,9 +12,9 @@ type Props = {};
 
 const Shop = ({}: Props) => {
   // region take new items on scroll
-  const [productTake, setProductTake] = useState(ShopConfig.InitialTake);
+  const [takeCount, setTakeCount] = useState(ShopConfig.InitialTake);
   const onLoadMore = () => {
-    setProductTake((take) => take + ShopConfig.TakeOnLoadMore);
+    setTakeCount((take) => take + ShopConfig.TakeOnLoadMore);
   };
   // endregion
 
@@ -24,7 +24,7 @@ const Shop = ({}: Props) => {
     console.log("onFilter", text);
     setFilterText(text);
     // reset take
-    setProductTake(ShopConfig.InitialTake);
+    setTakeCount(ShopConfig.InitialTake);
   };
   // endregion
 
@@ -35,24 +35,30 @@ const Shop = ({}: Props) => {
   >();
   const onCategoryChanged = (id: string | undefined) => {
     setSelectedCategoryId(id);
-    // reset take on category changed
-    setProductTake(ShopConfig.InitialTake);
+    // reset everything on category changed
+    //setFilterText("");
+    setTakeCount(ShopConfig.InitialTake);
   };
   // endregion
 
   // region products
-  const [products, totalProduct, productError, loadingProduct] =
-    useProductsByRange(0, productTake, filterText, selectedCategoryId);
+  const [products, totalProduct, productError, loadingProduct, loadingBy] =
+    useProductsByRange(0, takeCount, filterText, selectedCategoryId);
   // endregion
 
   const haveMore = products.length < totalProduct;
   return (
     <div className={css.container}>
-      <SearchBar className={css.searchBarBox} onSubmit={onFilterSubmit} />
+      <SearchBar
+        loading={loadingProduct && loadingBy === "filter"}
+        className={css.searchBarBox}
+        onSubmit={onFilterSubmit}
+      />
       <CategoryList
         className={css.categoryBox}
         items={categories}
         loading={loadingCategory}
+        loadingSelected={loadingProduct && loadingBy === "category"}
         selectedId={selectedCategoryId}
         onSelect={onCategoryChanged}
       />
@@ -62,13 +68,17 @@ const Shop = ({}: Props) => {
         items={products}
       />
 
-      {haveMore ? (
+      {loadingProduct && loadingBy === "takeMore" ? (
+        <div className={css.loadMore} onClick={onLoadMore}>
+          Loading...
+        </div>
+      ) : haveMore ? (
         <div className={css.loadMore} onClick={onLoadMore}>
           +Show More
         </div>
       ) : (
         <div className={css.noMore}>
-          {totalProduct > 0 ? `You've watched all item.` : "No item."}
+          {totalProduct > 0 ? `You've watched all item.` : ""}
         </div>
       )}
     </div>
