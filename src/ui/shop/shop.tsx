@@ -24,7 +24,7 @@ const Shop = ({}: Props) => {
   // endregion
 
   // region handle category
-  const [categories, categoryError] = useCategories();
+  const [categories, categoryError, loadingCategory] = useCategories();
   const [selectedCategoryId, setSelectedCategoryId] = useState<
     string | undefined
   >();
@@ -34,15 +34,17 @@ const Shop = ({}: Props) => {
   // endregion
 
   // region products
-  const [products, totalProduct, productError] = useProductsByRange(
-    0,
-    productTake,
-    filterText,
-    selectedCategoryId
-  );
+  const [products, totalProduct, productError, loadingProduct] =
+    useProductsByRange(0, productTake, filterText, selectedCategoryId);
   // endregion
 
-  return <div className={css.container}></div>;
+  return (
+    <div className={css.container}>
+      <div className={css.searchBarBox}></div>
+      <div className={css.categoryBox}></div>
+      <div className={css.productsBox}></div>
+    </div>
+  );
 };
 
 export default React.memo(Shop);
