@@ -31,6 +31,7 @@ const SearchBar = ({ className, style, onSubmit, loading }: Props) => {
     >
       <span className={classNames("material-icons", css.icon)}>search</span>
       <input
+        data-testid={"input"}
         value={text}
         maxLength={40}
         onChange={(e) => {

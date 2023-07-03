@@ -180,6 +180,10 @@ export default {
   //   "\\\\node_modules\\\\",
   //   "\\.pnp\\.[^\\\\]+$"
   // ],
+  transform: {
+    "^.+\\.[jt]sx?$": "babel-jest",
+    ".+\\.(css|styl|less|sass|scss)$": "jest-css-modules-transform",
+  },
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
   // unmockedModulePathPatterns: undefined,
