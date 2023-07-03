@@ -7,13 +7,15 @@ export const useProductsByRange = (
   take: number,
   filter: string | undefined,
   categoryId: string | undefined
-): [TProduct[], number, string] => {
+): [TProduct[], number, string, boolean] => {
   const [products, setProducts] = useState<TProduct[]>([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
     (async () => {
       try {
+        setLoading(true);
         const { products, total } = await Service.API.getProductsByRange(
           start,
           take,
@@ -24,8 +26,10 @@ export const useProductsByRange = (
         setTotal(total);
       } catch (e) {
         setError("Cannot load products");
+      } finally {
+        setLoading(false);
       }
     })();
   }, [start, take, filter, categoryId]);
-  return [products, total, error];
+  return [products, total, error, loading];
 };
