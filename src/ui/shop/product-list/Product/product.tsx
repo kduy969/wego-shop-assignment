@@ -31,8 +31,6 @@ const Product = ({ item }: Props) => {
       iconBG = "transparent";
   }
 
-  console.log("render product");
-
   return (
     <div data-testid={"product"} key={item.id} className={css.container}>
       <div className={css.topBox}>

@@ -1,4 +1,4 @@
-import { TCategory, TProduct } from "../../src/api/types";
+import { TCategory, TProduct } from "../src/api/types";
 
 export const TestProductList: TProduct[] = [
   {

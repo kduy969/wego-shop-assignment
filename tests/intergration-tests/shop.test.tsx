@@ -8,21 +8,18 @@ import {
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Shop from "../../src/ui/shop/shop";
-import {
-  expectNotToBeVisible,
-  expectTextToBeVisible,
-  expectToBeVisible,
-} from "../utils";
+import { expectToBeVisible } from "../utils";
 import { Service } from "../../src/service";
 import fetchMock from "jest-fetch-mock";
 import { Config } from "../../src/config";
 import { TestCategoryList, TestProductList } from "../test-data";
 import { ShopConfig } from "../../src/ui/shop/config";
+import { TProduct } from "../../src/api/types";
 
-// setup service
+// setup service for calling API
 Service.init();
 
-// mock fetch response
+// enable mocking API
 fetchMock.enableMocks();
 // @ts-ignore
 fetch.mockResponse((req) =>
@@ -71,38 +68,118 @@ function expectToSeeProductsWithQuantity(num: number) {
   expect(products.length).toBe(num);
 }
 
-function expectAllProductsMatchInitialLoad() {
-  const count = Math.min(TestProductList.length, ShopConfig.InitialTake);
+function getExpectedItems(config: Config) {
+  return TestProductList.filter((p) =>
+    isProductMatch(p, config.categoryId, config.search)
+  ).slice(config.pageIndex * ShopConfig.PageSize, config.count);
+}
+function expectAllProductsMatch(config: Config) {
+  const expectedItems = getExpectedItems(config);
   const productNames = screen.queryAllByTestId("product-name");
   const categories = screen.queryAllByTestId("product-category");
-  for (let i = 0; i < count; i++) {
-    const p = TestProductList[i];
+
+  expectedItems.forEach((p, i) => {
     expect(productNames[i].textContent).toMatch(p.name);
-    expect(categories[i]).toHaveAttribute("aria-description", p.category);
-  }
-}
-function expectAllProductsMatch(
-  filter: string | undefined,
-  categoryId: string | undefined
-) {
-  if (!!filter) {
-    const productNames = screen.queryAllByTestId("product-name");
-    productNames.every((name) => {
-      expect(name.textContent).toMatch(new RegExp(filter, "i"));
-    });
-  }
-  if (!!categoryId && categoryId !== "all") {
-    const categories = screen.queryAllByTestId("product-category");
-    categories.every((c) => {
-      expect(c).toHaveAttribute("aria-description", categoryId);
-    });
-  }
+    expect(categories[i]).toHaveAttribute("aria-description", p.categoryId);
+  });
 }
 
 async function waitForLoadMore() {
   const loadMore = expectToBeVisible("load-more");
   fireEvent.click(loadMore);
   await waitForFinishNextLoading();
+}
+
+async function waitForLoadNextPage() {
+  const loadNextPage = expectToBeVisible("load-next-page");
+  fireEvent.click(loadNextPage);
+  await waitForFinishNextLoading();
+}
+
+type Config = {
+  search: string;
+  categoryId: string;
+  count: number;
+  pageIndex: number;
+};
+
+function isProductMatch(p: TProduct, categoryId: string, search: string = "") {
+  const matchedCategory = categoryId === "all" || p.categoryId === categoryId;
+  const matchedFilter =
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.restaurant.toLowerCase().includes(search.toLowerCase());
+  return matchedCategory && matchedFilter;
+}
+
+function checkEverything(config: Config) {
+  expectToSeeProductsWithQuantity(config.count);
+  expectAllProductsMatch(config);
+}
+
+function getProductCount(filter: string, categoryId: string) {
+  return TestProductList.filter((p) => isProductMatch(p, categoryId, filter))
+    .length;
+}
+
+async function tryLoadMore(config: Config) {
+  const total = getProductCount(config.search, config.categoryId);
+  const taken = config.pageIndex * ShopConfig.PageSize + config.count;
+  const pageFulled = config.count >= ShopConfig.PageSize;
+  if (taken >= total || pageFulled) {
+    console.log("Cannot load more");
+    return false;
+  }
+
+  const remaining = total - taken;
+  const loadCount = Math.min(ShopConfig.TakeOnLoadMore, remaining);
+
+  // load more and check
+  await waitForLoadMore();
+  config.count += loadCount;
+  checkEverything(config);
+}
+
+async function tryLoadNextPage(config: Config) {
+  const total = getProductCount(config.search, config.categoryId);
+  const taken = config.pageIndex * ShopConfig.PageSize + config.count;
+  const pageFulled = config.count >= ShopConfig.PageSize;
+  if (taken >= total || !pageFulled) {
+    console.log("Cannot go next page");
+    return false;
+  }
+
+  const remaining = total - taken;
+  const loadCount = Math.min(ShopConfig.InitialTake, remaining);
+
+  // load and check
+  await waitForLoadNextPage();
+  config.count = loadCount;
+  config.pageIndex += 1;
+  checkEverything(config);
+}
+
+async function tryChangeCategory(config: Config, categoryId: string) {
+  await updateCategoryAndSubmit(categoryId);
+
+  // get next expected config
+  const total = getProductCount(config.search, categoryId);
+  config.pageIndex = 0;
+  config.count = Math.min(total, ShopConfig.InitialTake);
+  config.categoryId = categoryId;
+
+  checkEverything(config);
+}
+
+async function tryChangeSearch(config: Config, search: string) {
+  await updateSearchAndSubmit(search);
+
+  // get next expected config
+  const total = getProductCount(search, config.categoryId);
+  config.pageIndex = 0;
+  config.count = Math.min(total, ShopConfig.InitialTake);
+  config.search = search;
+
+  checkEverything(config);
 }
 
 test("Check initial load", async () => {
@@ -125,7 +202,15 @@ test("Check initial load", async () => {
   );
 
   expectToBeVisible("product-list");
-  expectAllProductsMatchInitialLoad();
+
+  let config: Config = {
+    search: "",
+    categoryId: "all",
+    pageIndex: 0,
+    count: ShopConfig.InitialTake,
+  };
+
+  checkEverything(config);
 });
 
 test("Check filter by product name", async () => {
@@ -137,19 +222,18 @@ test("Check filter by product name", async () => {
     screen.queryByTestId("status-product-loading")
   );
 
-  // update search filter to Drinks and submit
-  await updateSearchAndSubmit("Drinks");
-  expectToSeeProductsWithQuantity(ShopConfig.InitialTake);
-  expectAllProductsMatch("Drinks", undefined);
+  let config: Config = {
+    search: "",
+    categoryId: "all",
+    pageIndex: 0,
+    count: ShopConfig.InitialTake,
+  };
 
-  // update search filter to Maineland and submit
-  await updateSearchAndSubmit("maineland");
-  expectToSeeProductsWithQuantity(1);
-  expectAllProductsMatch("maineland", undefined);
+  await tryChangeSearch(config, "Drinks");
 
-  // clear filter -> Shop return to initial load
-  await updateSearchAndSubmit("");
-  expectAllProductsMatchInitialLoad();
+  await tryChangeSearch(config, "maineland");
+
+  await tryChangeSearch(config, "");
 });
 
 test("Check filter by category", async () => {
@@ -161,21 +245,24 @@ test("Check filter by category", async () => {
     screen.queryByTestId("status-product-loading")
   );
 
-  // change category to Sushi and check product list
-  await updateCategoryAndSubmit("6288a89f1f0152b8c2cd512b");
-  expectAllProductsMatch("", "6288a89f1f0152b8c2cd512b");
+  let config: Config = {
+    search: "",
+    categoryId: "all",
+    pageIndex: 0,
+    count: ShopConfig.InitialTake,
+  };
 
-  // change category to Dessert and check product list
-  await updateCategoryAndSubmit("6288a89fe6c2fe0b758360fe");
-  expectAllProductsMatch("", "6288a89fe6c2fe0b758360fe");
+  // change category to Sushi
+  await tryChangeCategory(config, "6288a89f1f0152b8c2cd512b");
+
+  // desert
+  await tryChangeCategory(config, "6288a89fe6c2fe0b758360fe");
 
   // change to all
-  await updateCategoryAndSubmit("all");
-  expectAllProductsMatchInitialLoad();
+  await tryChangeCategory(config, "all");
 
   // change category to drinks and check product list
-  await updateCategoryAndSubmit("6288a89fac9e970731bfaa7b");
-  expectAllProductsMatch("", "6288a89fac9e970731bfaa7b");
+  await tryChangeCategory(config, "6288a89fac9e970731bfaa7b");
 });
 
 test("Check filter by category and search", async () => {
@@ -190,96 +277,81 @@ test("Check filter by category and search", async () => {
     screen.queryByTestId("status-product-loading")
   );
 
+  let config: Config = {
+    search: "",
+    categoryId: "all",
+    pageIndex: 0,
+    count: ShopConfig.InitialTake,
+  };
+
   // search -> cate -> reset search -> reset cate -> to initial load
 
-  search = "maineland";
-  await updateSearchAndSubmit("maineland");
-  expectAllProductsMatch(search, categoryId);
+  await tryChangeSearch(config, "maineland");
 
   // pizza category
-  categoryId = "6288a89f7338764f2071a8a8";
-  await updateCategoryAndSubmit(categoryId);
-  expectAllProductsMatch(search, categoryId);
+  await tryChangeCategory(config, "6288a89f7338764f2071a8a8");
 
   // reset search
-  search = "";
-  await updateSearchAndSubmit(search);
-  expectAllProductsMatch(search, categoryId);
+  await tryChangeSearch(config, "");
 
   // reset category
-  categoryId = "all";
-  await updateCategoryAndSubmit(categoryId);
-  expectAllProductsMatch(search, categoryId);
+  await tryChangeCategory(config, "all");
 
   // cate -> search -> search -> cate
 
   // desserts category
-  categoryId = "6288a89fe6c2fe0b758360fe";
-  await updateCategoryAndSubmit(categoryId);
-  expectAllProductsMatch(search, categoryId);
+  await tryChangeCategory(config, "6288a89fe6c2fe0b758360fe");
 
-  search = "niquent";
-  await updateSearchAndSubmit(search);
-  expectAllProductsMatch(search, categoryId);
+  await tryChangeSearch(config, "niquent");
 
-  search = "zentia";
-  await updateSearchAndSubmit(search);
-  expectAllProductsMatch(search, categoryId);
+  await tryChangeSearch(config, "zentia");
 
   // hot meals category
-  categoryId = "6288a89f70dc8cf93b71609b";
-  await updateCategoryAndSubmit(categoryId);
-  expectAllProductsMatch(search, categoryId);
+  await tryChangeCategory(config, "6288a89f70dc8cf93b71609b");
 });
 
 test("Check load more logic", async () => {
   // load
   render(<Shop />);
-  let search = "";
-  let categoryId = "all";
-  let expectedCount = 0;
 
   // wait for initial loading
   await waitForElementToBeRemoved(() =>
     screen.queryByTestId("status-product-loading")
   );
-  expectedCount = ShopConfig.InitialTake;
 
   // should show load more
   expectToBeVisible("load-more");
 
-  // load more
-  await waitForLoadMore();
-  expectedCount += ShopConfig.TakeOnLoadMore;
-  expectToSeeProductsWithQuantity(expectedCount);
+  let config: Config = {
+    search: "",
+    categoryId: "all",
+    pageIndex: 0,
+    count: ShopConfig.InitialTake,
+  };
 
-  // load more
-  await waitForLoadMore();
-  expectedCount += ShopConfig.TakeOnLoadMore;
-  expectToSeeProductsWithQuantity(expectedCount);
+  await tryLoadMore(config);
 
-  // change category -> should reset load more
-  categoryId = "6288a89f1f0152b8c2cd512b";
-  expectedCount = ShopConfig.InitialTake;
-  await updateCategoryAndSubmit(categoryId);
-  expectToSeeProductsWithQuantity(expectedCount);
+  await tryLoadMore(config);
 
-  // load more
-  await waitForLoadMore();
-  expectedCount += ShopConfig.TakeOnLoadMore;
-  expectToSeeProductsWithQuantity(expectedCount);
+  await tryLoadMore(config);
 
-  // load more
-  await waitForLoadMore();
-  expectedCount += ShopConfig.TakeOnLoadMore;
-  expectToSeeProductsWithQuantity(expectedCount);
+  await tryLoadMore(config);
 
-  // change search to match 1 product -> hide load more button
-  search = "Boilicon";
-  expectedCount = 1; // because only 1 product match Boilicon
-  await updateSearchAndSubmit(search);
-  expectToSeeProductsWithQuantity(expectedCount);
+  await tryLoadNextPage(config);
 
-  expectNotToBeVisible("load-more");
-  expectToBeVisible("no-more");
+  await tryChangeCategory(config, "6288a89f1f0152b8c2cd512b");
+
+  await tryLoadMore(config);
+
+  await tryLoadMore(config);
+
+  await tryLoadMore(config);
+
+  await tryLoadMore(config);
+
+  await tryLoadNextPage(config);
+
+  await tryChangeSearch(config, "Boilicon");
+
+  await tryLoadMore(config);
 });
