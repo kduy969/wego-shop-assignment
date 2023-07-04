@@ -50,8 +50,6 @@
 .topBox {
   display: flex;
   position: relative;
-  background: green;
-
 }
 
 .topBox .image {
@@ -59,7 +57,7 @@
   width: 100%;
   height: 120px;
   object-fit: cover;
-  background: #c4c4c4;
+  background: #e1e1e1;
 }
 
 .topBox .statusIcon {
@@ -73,8 +71,17 @@
   border-radius: 0px 0px 8px 0px;
 }
 
+.topBox .bottomCover {
+  position: absolute;
+  bottom: 0;
+  transform: translateY(2px);
+  width: 100%;
+  height: 30px;
+  background: linear-gradient(to top, white 0%, white 20%, transparent 100%);
+}
+
 .bottomBox {
-  padding: 10px 16px;
+  padding: 0px 14px 16px 14px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -82,6 +89,7 @@
 }
 
 .bottomBox .title {
+  margin-left: 2px;
   font-size: 0.9rem;
   font-weight: bold;
   color: $text-color;

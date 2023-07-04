@@ -38,9 +38,7 @@ const Shop = ({}: Props) => {
   // region handle search
   const [filterText, setFilterText] = useState<string>("");
   const onFilterSubmit = (text: string) => {
-    console.log("onFilter", text);
     setFilterText(text);
-    // reset take
     setPageNumber(0);
     setTakeCount(ShopConfig.InitialTake);
   };

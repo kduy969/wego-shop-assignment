@@ -50,6 +50,7 @@ const Product = ({ item }: Props) => {
             {icon}
           </span>
         )}
+        <div className={css.bottomCover} />
       </div>
       <div className={css.bottomBox}>
         <div
