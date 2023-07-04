@@ -7,17 +7,15 @@ import React, {
 } from "react";
 import css from "./shop.module.scss";
 import { ShopConfig } from "./config";
-import { Service } from "../../service";
+
 import { useCategories } from "./hooks/use-categories";
 import { useProductsByRange } from "./hooks/use-products-by-range";
 import SearchBar from "./search-bar/search-bar";
 import CategoryList from "./category-list/category-list";
 import ProductList from "./product-list/product-list";
-import { useScrollToBottom } from "../../hooks/useScrollToBottom";
+
 import { useScrollTopOnNextPageLoaded } from "./hooks/use-scroll-top-on-next-page-loaded";
 import { useLoadMoreOnScrollBottom } from "./hooks/use-load-more-on-scroll-bottom";
-import { Simulate } from "react-dom/test-utils";
-import load = Simulate.load;
 
 type Props = {};
 

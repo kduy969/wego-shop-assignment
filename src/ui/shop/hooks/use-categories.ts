@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { TCategory } from "../../../api/types";
 import { Service } from "../../../service";
-import { Simulate } from "react-dom/test-utils";
-import load = Simulate.load;
 
 export const useCategories = (): [TCategory[], string, boolean] => {
   const [loading, setLoading] = useState(true);

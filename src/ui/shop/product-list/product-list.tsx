@@ -4,8 +4,6 @@ import css from "./product-list.module.scss";
 import Product from "./Product/product";
 import { ViewStyle } from "../../base-types/view-style";
 import classNames from "classnames";
-import { Simulate } from "react-dom/test-utils";
-import error = Simulate.error;
 import ProductFake from "./Product/product-fake";
 
 type Props = ViewStyle & {
@@ -66,8 +64,8 @@ const ProductList = ({ items, loading, style, className, error }: Props) => {
         <Product item={i} key={i.id} />
       ))}
 
-      {[1, 2, 3, 4, 5].map(() => (
-        <ProductFake />
+      {[1, 2, 3, 4, 5].map((i) => (
+        <ProductFake key={`test${i}`} />
       ))}
     </div>
   );

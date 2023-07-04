@@ -3,8 +3,7 @@ import { TCategory } from "../../../api/types";
 import css from "./category-list.module.scss";
 import { ViewStyle } from "../../base-types/view-style";
 import classNames from "classnames";
-import { Simulate } from "react-dom/test-utils";
-import load = Simulate.load;
+
 import LoadingAnimation from "../loading-animation/loading-animation";
 
 type Props = ViewStyle & {
