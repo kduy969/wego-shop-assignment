@@ -4,7 +4,12 @@ import { Service } from "../../../service";
 import { usePrevious } from "../../../hooks/usePrevious";
 import { ShopConfig } from "../config";
 
-type TLoadingBy = "nextPage" | "takeMore" | "category" | "filter" | "initial";
+export type TLoadingBy =
+  | "nextPage"
+  | "takeMore"
+  | "category"
+  | "filter"
+  | "initial";
 
 export const useProductsByRange = (
   pageIndex: number,

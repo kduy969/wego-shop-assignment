@@ -1,18 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import css from "./shop.module.scss";
 import { ShopConfig } from "./config";
 import { Service } from "../../service";
-import { useCategories } from "./hooks/useCategories";
-import { useProductsByRange } from "./hooks/useProductsByRange";
+import { useCategories } from "./hooks/use-categories";
+import { useProductsByRange } from "./hooks/use-products-by-range";
 import SearchBar from "./search-bar/search-bar";
 import CategoryList from "./category-list/category-list";
 import ProductList from "./product-list/product-list";
+import { useScrollToBottom } from "../../hooks/useScrollToBottom";
+import { useScrollTopOnNextPageLoaded } from "./hooks/use-scroll-top-on-next-page-loaded";
+import { useLoadMoreOnScrollBottom } from "./hooks/use-load-more-on-scroll-bottom";
 
 type Props = {};
 
-const test = [];
 const Shop = ({}: Props) => {
-  // region take new items on scroll
+  // region handle pagination
   const [takeCount, setTakeCount] = useState(ShopConfig.InitialTake);
   const [pageNumber, setPageNumber] = useState(0);
   const onLoadMore = () => {
@@ -22,9 +30,10 @@ const Shop = ({}: Props) => {
     setPageNumber((page) => page + 1);
     setTakeCount(ShopConfig.InitialTake);
   };
+
   // endregion
 
-  // region handle filter data
+  // region handle search
   const [filterText, setFilterText] = useState<string>("");
   const onFilterSubmit = (text: string) => {
     console.log("onFilter", text);
@@ -48,7 +57,7 @@ const Shop = ({}: Props) => {
   };
   // endregion
 
-  // region products
+  // region load products
   const [products, totalProduct, productError, loadingProduct, loadingBy] =
     useProductsByRange(pageNumber, takeCount, filterText, selectedCategoryId);
   // endregion
@@ -58,16 +67,26 @@ const Shop = ({}: Props) => {
   const pageFulled = products.length >= ShopConfig.PageSize;
   const showMore = haveMore && !pageFulled;
   const showNextPage = haveMore && pageFulled;
+
+  // auto load more
+  const [setBottomRef] = useLoadMoreOnScrollBottom(
+    loadingProduct,
+    showMore,
+    onLoadMore
+  );
+
+  // auto scroll top when next page loaded
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useScrollTopOnNextPageLoaded(loadingProduct, loadingBy, scrollRef);
+
   return (
-    <div className={css.container}>
+    <div ref={scrollRef} className={css.container}>
       <SearchBar
-        key={"search-bar"}
         loading={loadingProduct && loadingBy === "filter"}
         className={css.searchBarBox}
         onSubmit={onFilterSubmit}
       />
       <CategoryList
-        key={"category-list"}
         className={css.categoryBox}
         items={categories}
         loading={loadingCategory}
@@ -76,7 +95,6 @@ const Shop = ({}: Props) => {
         onSelect={onCategoryChanged}
       />
       <ProductList
-        key={"product-list"}
         className={css.productsBox}
         loading={!!loadingProduct}
         items={products}
@@ -115,6 +133,7 @@ const Shop = ({}: Props) => {
           {totalProduct > 0 ? `You've watched all item.` : ""}
         </div>
       )}
+      <div ref={setBottomRef} className={css.bottomScroll} />
     </div>
   );
 };
