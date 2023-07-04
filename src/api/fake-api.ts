@@ -14,8 +14,13 @@ export class FakeApi implements ApiInterface {
     categoryId: string | undefined
   ) {
     // get all
-    const allProducts: TProduct[] =
-      (await fetch(Config.ProductListURL).then((res) => res.json())) || [];
+
+    let allProducts: TProduct[] = await fetch(Config.ProductListURL).then(
+      (res) => {
+        return res.json();
+      }
+    );
+    allProducts = allProducts || [];
 
     // get filtered list
     let filteredProducts = allProducts;

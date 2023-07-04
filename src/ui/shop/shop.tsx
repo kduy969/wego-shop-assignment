@@ -35,15 +35,14 @@ const Shop = ({}: Props) => {
   >();
   const onCategoryChanged = (id: string | undefined) => {
     setSelectedCategoryId(id);
-    // reset everything on category changed
-    //setFilterText("");
+    // reset to initial take on category changed
     setTakeCount(ShopConfig.InitialTake);
   };
   // endregion
 
   // region products
   const [products, totalProduct, productError, loadingProduct, loadingBy] =
-    useProductsByRange(0, takeCount, filterText, selectedCategoryId);
+    useProductsByRange(takeCount, filterText, selectedCategoryId);
   // endregion
 
   const haveMore = products.length < totalProduct;
@@ -68,16 +67,27 @@ const Shop = ({}: Props) => {
         items={products}
       />
 
+      {!!loadingProduct && <div data-testid={"status-product-loading"} />}
+      {!loadingCategory && <div data-testid={"category-loaded"} />}
+
       {loadingProduct && loadingBy === "takeMore" ? (
-        <div className={css.loadMore} onClick={onLoadMore}>
+        <div
+          data-testid={"loading-more"}
+          className={css.loadMore}
+          onClick={onLoadMore}
+        >
           Loading...
         </div>
       ) : haveMore ? (
-        <div className={css.loadMore} onClick={onLoadMore}>
+        <div
+          data-testid={"load-more"}
+          className={css.loadMore}
+          onClick={onLoadMore}
+        >
           +Show More
         </div>
       ) : (
-        <div className={css.noMore}>
+        <div data-testid={"no-more"} className={css.noMore}>
           {totalProduct > 0 ? `You've watched all item.` : ""}
         </div>
       )}
