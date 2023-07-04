@@ -19,6 +19,7 @@
     border: 1px $accent-color solid;
     border-radius: 6px;
     flex-wrap: wrap;
+    overflow: hidden;
 }
 
 .item {
@@ -44,6 +45,7 @@
 .item.selected {
     font-weight: bold;
     background: $accent-color;
+    border-radius: 2px;
 }
 
 .clearSelected {
