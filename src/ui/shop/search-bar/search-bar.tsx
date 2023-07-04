@@ -22,11 +22,6 @@ const SearchBar = ({ className, style, onSubmit, loading }: Props) => {
 
   // show confirm if text has changed from the last commit
   const showConfirm = text !== lastSubmitText;
-  // useImperativeHandle(ref, () => {
-  //   return {
-  //     // ... your methods ...
-  //   };
-  // }, []);
   return (
     <div
       data-testid={"search-bar"}
