@@ -13,12 +13,15 @@ type Props = ViewStyle & {
 
 const SearchBar = ({ className, style, onSubmit, loading }: Props) => {
   const [text, setText] = useState<string>("");
-  const [submitted, setSubmitted] = useState(false);
+  const [lastSubmitText, setLastSubmitText] = useState("");
   const onSubmitCB = useCallback(() => {
     onSubmit(text);
-    setSubmitted(true);
+    setLastSubmitText(text);
   }, [text, onSubmit]);
   useKeyPress(KeyboardKeys.Enter, onSubmitCB);
+
+  // show confirm if text has changed from the last commit
+  const showConfirm = text !== lastSubmitText;
   // useImperativeHandle(ref, () => {
   //   return {
   //     // ... your methods ...
@@ -26,25 +29,25 @@ const SearchBar = ({ className, style, onSubmit, loading }: Props) => {
   // }, []);
   return (
     <div
+      data-testid={"search-bar"}
       style={style}
       className={classNames(css.container, className, loading && css.disabled)}
     >
       <span className={classNames("material-icons", css.icon)}>search</span>
       <input
         disabled={loading}
-        data-testid={"input"}
+        data-testid={"search-input"}
         value={text}
         maxLength={40}
         onChange={(e) => {
-          setSubmitted(false);
           setText(e.target.value);
         }}
         placeholder={"Search by product or restaurant name"}
         className={classNames(css.input)}
       />
-      {!!text && !submitted && (
+      {showConfirm && (
         <div
-          data-testid={"confirm-box"}
+          data-testid={"submit-box"}
           onClick={onSubmitCB}
           className={classNames(css.submitBox)}
         >
@@ -62,7 +65,7 @@ const SearchBar = ({ className, style, onSubmit, loading }: Props) => {
             onClick={() => {
               setText("");
               onSubmit("");
-              setSubmitted(true);
+              setLastSubmitText("");
             }}
           >
             clear

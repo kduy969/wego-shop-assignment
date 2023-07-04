@@ -10,7 +10,7 @@ import {
 
 function testConfirmBoxToBeVisible() {
   test("Expect confirm box is visible", async () => {
-    expectToBeVisible("confirm-box");
+    expectToBeVisible("submit-box");
     expectTextToBeVisible("Apply search");
     expectTextToBeVisible("Press Enter");
   });
@@ -18,7 +18,7 @@ function testConfirmBoxToBeVisible() {
 
 function testConfirmBoxNotToBeVisible() {
   test("Expect confirm box is not visible", async () => {
-    expectNotToBeVisible("confirm-box");
+    expectNotToBeVisible("submit-box");
   });
 }
 
@@ -48,7 +48,7 @@ function testClearIconToBeVisible() {
 
 function testInputChangeOnKeyboardEvent() {
   test("Expect input change on keyboard event", async () => {
-    const input: HTMLInputElement = screen.getByTestId("input");
+    const input: HTMLInputElement = screen.getByTestId("search-input");
     fireEvent.input(input, { target: { value: "123" } });
     expect(input.value).toBe("123");
   });
@@ -56,7 +56,7 @@ function testInputChangeOnKeyboardEvent() {
 
 function testInputToBeDisabled() {
   test("Expect input is disabled", async () => {
-    const input = screen.getByTestId("input");
+    const input = screen.getByTestId("search-input");
     expect(input).toBeDisabled();
   });
 }
@@ -78,7 +78,7 @@ describe("Check search bar is rendered correctly in initial state", () => {
 test("Test basic user interaction", async () => {
   render(<SearchBar loading={false} onSubmit={() => {}} />);
 
-  const input: HTMLInputElement = screen.getByTestId("input");
+  const input: HTMLInputElement = screen.getByTestId("search-input");
 
   // check input update on keyboard event
   fireEvent.input(input, { target: { value: "123" } });
@@ -87,7 +87,7 @@ test("Test basic user interaction", async () => {
   // check confirm box is showed after user input
   await waitFor(() => {
     const confirmBox: HTMLDivElement | null =
-      screen.queryByTestId("confirm-box");
+      screen.queryByTestId("submit-box");
     expect(confirmBox).toBeInTheDocument();
   });
 
