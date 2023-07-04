@@ -53,7 +53,8 @@ const Shop = ({}: Props) => {
     useProductsByRange(pageNumber, takeCount, filterText, selectedCategoryId);
   // endregion
 
-  const haveMore = products.length < totalProduct;
+  const taken = products.length + pageNumber * ShopConfig.PageSize;
+  const haveMore = taken < totalProduct;
   const pageFulled = products.length >= ShopConfig.PageSize;
   const showMore = haveMore && !pageFulled;
   const showNextPage = haveMore && pageFulled;
@@ -84,7 +85,8 @@ const Shop = ({}: Props) => {
       {!!loadingProduct && <div data-testid={"status-product-loading"} />}
       {!loadingCategory && <div data-testid={"category-loaded"} />}
 
-      {loadingProduct && loadingBy === "takeMore" ? (
+      {loadingProduct &&
+      (loadingBy === "takeMore" || loadingBy === "nextPage") ? (
         <div
           data-testid={"loading-more"}
           className={css.loadMore}
