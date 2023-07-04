@@ -8,7 +8,7 @@ import load = Simulate.load;
 import LoadingAnimation from "../loading-animation/loading-animation";
 
 type Props = ViewStyle & {
-  error?: string; // error while loading category list
+  error?: string; // error occur when loading category list
   items: TCategory[];
   selectedId?: string;
   onSelect?: (id: string | undefined) => void;
