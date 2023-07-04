@@ -4,10 +4,12 @@ import { TLoadingBy } from "./use-products-by-range";
 export function useScrollTopOnNextPageLoaded(
   loadingProduct: boolean,
   loadingBy: TLoadingBy,
+  productError: string,
   scrollRef: RefObject<HTMLElement>
 ) {
   useEffect(() => {
-    if (!loadingProduct && loadingBy === "nextPage") {
+    // scroll to top if load new products successfully from "nextPage" action
+    if (!loadingProduct && loadingBy === "nextPage" && !productError) {
       scrollRef.current?.scrollTo?.({
         top: 0,
         left: 0,

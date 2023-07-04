@@ -14,6 +14,7 @@ export const useCategories = (): [TCategory[], string, boolean] => {
         setLoading(true);
         const cates = await Service.API.getCategories();
         setCategories(cates);
+        setError("");
       } catch (e) {
         setError("Cannot load categories");
       } finally {

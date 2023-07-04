@@ -16,6 +16,8 @@ import ProductList from "./product-list/product-list";
 import { useScrollToBottom } from "../../hooks/useScrollToBottom";
 import { useScrollTopOnNextPageLoaded } from "./hooks/use-scroll-top-on-next-page-loaded";
 import { useLoadMoreOnScrollBottom } from "./hooks/use-load-more-on-scroll-bottom";
+import { Simulate } from "react-dom/test-utils";
+import load = Simulate.load;
 
 type Props = {};
 
@@ -58,26 +60,39 @@ const Shop = ({}: Props) => {
   // endregion
 
   // region load products
-  const [products, totalProduct, productError, loadingProduct, loadingBy] =
-    useProductsByRange(pageNumber, takeCount, filterText, selectedCategoryId);
+  const [
+    products,
+    totalProduct,
+    productError,
+    loadingProduct,
+    loadingBy,
+    reTryLoadProduct,
+  ] = useProductsByRange(pageNumber, takeCount, filterText, selectedCategoryId);
   // endregion
+
+  // user make takeMore/nextPage action lead to load product error -> show refresh button to allow user to retry
+  const showRetry = !!(
+    (loadingBy === "takeMore" || loadingBy === "nextPage") &&
+    productError
+  );
 
   const taken = products.length + pageNumber * ShopConfig.PageSize;
   const haveMore = taken < totalProduct;
   const pageFulled = products.length >= ShopConfig.PageSize;
-  const showMore = haveMore && !pageFulled;
-  const showNextPage = haveMore && pageFulled;
+  const showMore = haveMore && !pageFulled && !showRetry && !loadingProduct;
+  const showNextPage = haveMore && pageFulled && !showRetry && !loadingProduct;
 
   // auto load more
-  const [setBottomRef] = useLoadMoreOnScrollBottom(
-    loadingProduct,
-    showMore,
-    onLoadMore
-  );
+  const [setBottomRef] = useLoadMoreOnScrollBottom(showMore, onLoadMore);
 
   // auto scroll top when next page loaded
   const scrollRef = useRef<HTMLDivElement>(null);
-  useScrollTopOnNextPageLoaded(loadingProduct, loadingBy, scrollRef);
+  useScrollTopOnNextPageLoaded(
+    loadingProduct,
+    loadingBy,
+    productError,
+    scrollRef
+  );
 
   return (
     <div ref={scrollRef} className={css.container}>
@@ -102,8 +117,10 @@ const Shop = ({}: Props) => {
         items={products}
       />
 
+      <div ref={setBottomRef} className={css.bottomScroll} />
+
       {!!loadingProduct && <div data-testid={"status-product-loading"} />}
-      {!loadingCategory && <div data-testid={"category-loaded"} />}
+      {!!loadingCategory && <div data-testid={"status-category-loading"} />}
 
       {loadingProduct &&
       (loadingBy === "takeMore" || loadingBy === "nextPage") ? (
@@ -113,6 +130,14 @@ const Shop = ({}: Props) => {
           onClick={onLoadMore}
         >
           Loading...
+        </div>
+      ) : showRetry ? (
+        <div
+          data-testid={"retry-now"}
+          className={css.loadMore}
+          onClick={reTryLoadProduct}
+        >
+          Retry now
         </div>
       ) : showMore ? (
         <div
@@ -135,7 +160,6 @@ const Shop = ({}: Props) => {
           {totalProduct > 0 ? `You've watched all item.` : ""}
         </div>
       ) : null}
-      <div ref={setBottomRef} className={css.bottomScroll} />
     </div>
   );
 };

@@ -17,7 +17,8 @@ const ProductList = ({ items, loading, style, className, error }: Props) => {
   const showPlaceHolder = loading && items.length === 0;
   const noItems = items.length === 0;
 
-  if (!!error)
+  // do not show error if some products are being showed to the user
+  if (!!error && items.length === 0)
     return (
       <div
         data-testid={"product-error"}

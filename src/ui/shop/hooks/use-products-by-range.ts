@@ -16,16 +16,24 @@ export const useProductsByRange = (
   take: number,
   filter: string | undefined,
   categoryId: string | undefined
-): [TProduct[], number, string, boolean, TLoadingBy] => {
+): [TProduct[], number, string, boolean, TLoadingBy, () => void] => {
   const [products, setProducts] = useState<TProduct[]>([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingBy, setLoadingBy] = useState<TLoadingBy>("takeMore");
+
+  // update this variable to reSync the product list due to last sync failed
+  const [reSyncId, setReSyncId] = useState(0);
+  const reSync = () => {
+    setReSyncId((r) => r + 1);
+  };
+
   const previousTake = usePrevious(take);
   const previousCategoryId = usePrevious(categoryId);
   const previousFilter = usePrevious(filter);
   const previousPage = usePrevious(pageIndex);
+  const previousSyncId = usePrevious(reSyncId);
 
   // save the latest running job id -> ignore job result if jobId !== latestJobId
   const latestJobId = useRef<number>(0);
@@ -43,7 +51,10 @@ export const useProductsByRange = (
         //   previousCategoryId,
         //   previousFilter,
         // });
-        const loadingByTemp =
+        const isReSync =
+          previousSyncId !== undefined && reSyncId !== previousSyncId;
+
+        const tmpLoadingBy =
           !previousTake &&
           !previousCategoryId &&
           !previousFilter &&
@@ -58,9 +69,13 @@ export const useProductsByRange = (
             : previousFilter !== filter // when user change filter
             ? "filter"
             : "initial";
-        setLoadingBy(loadingByTemp);
+
+        // reserve loadingBy on Resync
+        const nextLoadingBy = isReSync ? loadingBy : tmpLoadingBy;
+
+        setLoadingBy(nextLoadingBy);
         setLoading(true);
-        if (loadingByTemp === "takeMore") {
+        if (nextLoadingBy === "takeMore") {
           // only load new items from last position
           const { products: additionalItems, total: newTotal } =
             await Service.API.getProductsByRange(
@@ -69,9 +84,11 @@ export const useProductsByRange = (
               filter,
               categoryId
             );
+
           if (myJobId === latestJobId.current) {
             setProducts(products.concat(additionalItems));
             setTotal(newTotal);
+            setError("");
           }
         } else {
           // for every other case, load from beginning of current page
@@ -82,9 +99,11 @@ export const useProductsByRange = (
               filter,
               categoryId
             );
+
           if (myJobId === latestJobId.current) {
             setProducts(newItems);
             setTotal(newTotal);
+            setError("");
           }
         }
       } catch (e: any) {
@@ -95,6 +114,6 @@ export const useProductsByRange = (
         if (myJobId === latestJobId.current) setLoading(false);
       }
     })();
-  }, [take, pageIndex, filter, categoryId]);
-  return [products, total, error, loading, loadingBy];
+  }, [take, pageIndex, filter, categoryId, reSyncId]);
+  return [products, total, error, loading, loadingBy, reSync];
 };
