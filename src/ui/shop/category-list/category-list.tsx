@@ -26,6 +26,7 @@ const CategoryList = ({
 }: Props) => {
   return (
     <div
+      data-testid={"category-list"}
       style={style}
       className={classNames(
         css.container,
@@ -58,8 +59,10 @@ const CategoryList = ({
                 selectedId === undefined && loadingSelected && css.loading
               )}
               onClick={() => onSelect?.(undefined)}
-              aria-description={selectedId === undefined ? "selected" : ""}
+              aria-checked={selectedId === undefined}
               key={"All"}
+              data-testid={"category-item"}
+              aria-description={"all"} // mark this item as All category for testing
             >
               All
               {selectedId === undefined && loadingSelected && (
@@ -72,14 +75,16 @@ const CategoryList = ({
               return (
                 <div
                   style={{
-                    width: item.name.length * 10 + 20, //estimate and set text to fixed width to prevent size change on fontWeight change, 20 for padding, 8 for character size
+                    width: item.name.length * 10 + 20, //estimate and set text to fixed width to prevent size change on fontWeight change, 20 for padding, 10 for character size
                   }}
-                  aria-description={selected ? "selected" : ""}
+                  aria-checked={!!selected}
                   className={classNames(
                     css.item,
                     selected && css.selected,
                     loading && css.loading
                   )}
+                  data-testid={"category-item"}
+                  aria-description={item.id}
                   onClick={() => onSelect?.(item.id)}
                   key={item.id}
                 >

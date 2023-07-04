@@ -32,7 +32,7 @@ const Product = ({ item }: Props) => {
   }
 
   return (
-    <div key={item.id} className={css.container}>
+    <div data-testid={"product"} key={item.id} className={css.container}>
       <div className={css.topBox}>
         <img src={item.imageUrl} className={css.image} />
         {!!icon && (
@@ -52,7 +52,14 @@ const Product = ({ item }: Props) => {
         )}
       </div>
       <div className={css.bottomBox}>
-        <div className={css.title}>{item.name}</div>
+        <div
+          className={"test-element"}
+          data-testid={"product-category"}
+          aria-description={item.categoryId}
+        />
+        <div data-testid={"product-name"} className={css.title}>
+          {item.name}
+        </div>
         <div className={css.infoRow}>
           <Rating className={css.infoItem} rate={item.rating} />
           {!!item.minCookTime && !!item.maxCookTime && (

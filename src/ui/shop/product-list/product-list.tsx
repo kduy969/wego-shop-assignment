@@ -16,7 +16,10 @@ const ProductList = ({ items, loading, style, className }: Props) => {
 
   if (showPlaceHolder)
     return (
-      <div className={classNames(css.loadingPlaceHolder, className)}>
+      <div
+        data-testid={"product-loading"}
+        className={classNames(css.loadingPlaceHolder, className)}
+      >
         <span className={classNames(css.icon, "material-icons")}>
           inventory_2
         </span>
@@ -26,7 +29,10 @@ const ProductList = ({ items, loading, style, className }: Props) => {
 
   if (noItems)
     return (
-      <div className={classNames(css.loadingPlaceHolder, className)}>
+      <div
+        data-testid={"product-empty"}
+        className={classNames(css.loadingPlaceHolder, className)}
+      >
         <span className={classNames(css.icon, "material-icons")}>
           inventory_2
         </span>
@@ -35,7 +41,11 @@ const ProductList = ({ items, loading, style, className }: Props) => {
     );
 
   return (
-    <div style={style} className={classNames(css.container, className)}>
+    <div
+      data-testid={"product-list"}
+      style={style}
+      className={classNames(css.container, className)}
+    >
       {items.map((i) => (
         <Product item={i} key={i.id} />
       ))}

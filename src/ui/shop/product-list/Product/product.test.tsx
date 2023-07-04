@@ -81,19 +81,19 @@ const DiscountProduct: TProduct = {
 };
 
 function checkNameMatched(p: TProduct) {
-  test("Check name is matched", async () => {
+  test("Expect name is matched", async () => {
     expectTextToBeVisible(p.name);
   });
 }
 
 function checkRatingMatched(p: TProduct) {
-  test("Check rating is matched", async () => {
+  test("Expect rating is matched", async () => {
     expectTextToBeVisible(p.rating.toFixed(1).toString());
   });
 }
 
 function checkCookTimeMatched(p: TProduct) {
-  test("Check cooking time is matched", async () => {
+  test("Expect cooking time is matched", async () => {
     if (!!p.minCookTime && !!p.maxCookTime) {
       expectTextToBeVisible(p.minCookTime.toString(), false);
       expectTextToBeVisible(p.maxCookTime.toString(), false);
@@ -102,7 +102,7 @@ function checkCookTimeMatched(p: TProduct) {
 }
 
 function checkIsNewMatched(p: TProduct) {
-  test("Check new status is matched", async () => {
+  test("Expect new status is matched", async () => {
     if (!!p.isNew) {
       expectTextToBeVisible("New");
     } else {
@@ -112,7 +112,7 @@ function checkIsNewMatched(p: TProduct) {
 }
 
 function checkPromotionIsMatched(p: TProduct) {
-  test("Check promotion is matched", async () => {
+  test("Expect promotion is matched", async () => {
     if (!!p.promotion) expectToBeVisible(`${p.id}-promotion-${p.promotion}`);
   });
 }
@@ -128,22 +128,22 @@ function checkProduct(p: TProduct) {
   checkPromotionIsMatched(p);
 }
 
-describe("Check product with full information, no discount is displayed correctly", () => {
+describe("Check if rendered correctly with full information, no discount", () => {
   checkProduct(NoPromotionProduct);
 });
 
-describe("Check product with discount coupon is displayed correctly", () => {
+describe("Check if rendered correctly with discount coupon", () => {
   checkProduct(DiscountProduct);
 });
 
-describe("Check product with 1+1 coupon is displayed correctly", () => {
+describe("Check if rendered correctly with 1+1 coupon", () => {
   checkProduct(BuyOneGetOneProduct);
 });
 
-describe("Check product with gift coupon is displayed correctly", () => {
+describe("Check if rendered correctly with gift coupon", () => {
   checkProduct(GiftProduct);
 });
 
-describe("Check product with super long name is displayed correctly", () => {
+describe("Check if rendered product with super long name", () => {
   checkProduct(SuperLongNameProduct);
 });

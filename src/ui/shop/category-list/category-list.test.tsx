@@ -34,7 +34,7 @@ const TestData = [
 function expectCategoryToBeHighlighted(text: string) {
   const textElement = screen.getByText(text);
   expect(textElement).toBeVisible();
-  expect(textElement).toHaveAttribute("aria-description", "selected");
+  expect(textElement).toHaveAttribute("aria-checked", "true");
 }
 
 function expectAllCategoriesToBeVisible() {
@@ -50,12 +50,12 @@ function expectLoadingIconToBeVisible() {
   expectToBeVisible("loading-icon");
 }
 
-test("Check component is rendered correctly in state: loading data", async () => {
+test("Check if rendered correctly in state: loading data", async () => {
   render(<CategoryList loading={true} items={[]} />);
   expectLoadingIconToBeVisible();
 });
 
-test("Check is rendered correctly in state: loaded data, have some data to displayed, no category is selected", async () => {
+test("Check if rendered correctly in state: loaded data, have some data to displayed, no category is selected", async () => {
   render(
     <CategoryList loading={false} items={TestData} selectedId={undefined} />
   );
@@ -66,13 +66,13 @@ test("Check is rendered correctly in state: loaded data, have some data to displ
   expectCategoryToBeHighlighted("All");
 });
 
-test("Check is rendered correctly in state: loaded data, have no data to displayed", async () => {
+test("Check if rendered correctly in state: loaded data, have no data to displayed", async () => {
   render(<CategoryList loading={false} items={[]} selectedId={undefined} />);
 
   expectCategoryToBeHighlighted("All");
 });
 
-test("Check is rendered correctly in state: loaded data, have some data, one category is selected", async () => {
+test("Check if rendered correctly in state: loaded data, have some data, one category is selected", async () => {
   render(
     <CategoryList
       loading={false}
@@ -88,7 +88,7 @@ test("Check is rendered correctly in state: loaded data, have some data, one cat
   expectCategoryToBeHighlighted("Drinks");
 });
 
-test("Check is rendered correctly in state: loaded data, have some data, one category is selected and is being loaded", async () => {
+test("Check if rendered correctly in state: loaded data, have some data, one category is selected and is being loaded", async () => {
   render(
     <CategoryList
       loading={false}

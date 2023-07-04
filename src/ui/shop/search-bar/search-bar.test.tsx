@@ -61,7 +61,7 @@ function testInputToBeDisabled() {
   });
 }
 
-describe("Check search bar is rendered correctly in initial state", () => {
+describe("Check if rendered correctly in initial state", () => {
   beforeEach(() => {
     render(<SearchBar loading={false} onSubmit={() => {}} />);
   });
@@ -75,7 +75,7 @@ describe("Check search bar is rendered correctly in initial state", () => {
   testInputChangeOnKeyboardEvent();
 });
 
-test("Test basic user interaction", async () => {
+test("Check basic user interaction", async () => {
   render(<SearchBar loading={false} onSubmit={() => {}} />);
 
   const input: HTMLInputElement = screen.getByTestId("search-input");
@@ -101,7 +101,7 @@ test("Test basic user interaction", async () => {
   });
 });
 
-describe("Check search bar is rendered correctly in loading state", () => {
+describe("Check if rendered correctly in loading state", () => {
   beforeEach(() => {
     render(<SearchBar loading={true} onSubmit={() => {}} />);
   });
