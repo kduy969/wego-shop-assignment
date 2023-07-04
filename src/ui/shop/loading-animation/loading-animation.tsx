@@ -7,7 +7,10 @@ type Props = ViewStyle & {};
 
 const LoadingAnimation = ({ className }: Props) => {
   return (
-    <div className={classNames(css.container, className)}>
+    <div
+      data-testid={"loading-icon"}
+      className={classNames(css.container, className)}
+    >
       <div className={classNames(css.dotFlashing, className)} />
     </div>
   );

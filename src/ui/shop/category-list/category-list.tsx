@@ -9,10 +9,10 @@ import LoadingAnimation from "../loading-animation/loading-animation";
 
 type Props = ViewStyle & {
   items: TCategory[];
-  selectedId: string | undefined;
-  onSelect: (id: string | undefined) => void;
+  selectedId?: string;
+  onSelect?: (id: string | undefined) => void;
   loading: boolean; // category list is being loading
-  loadingSelected: boolean; // selected category's product is being loading
+  loadingSelected?: boolean; // selected category's product is being loading
 };
 
 const CategoryList = ({
@@ -40,7 +40,7 @@ const CategoryList = ({
               width: 100,
             }}
             className={classNames(css.item, css.loading)}
-            onClick={() => onSelect(undefined)}
+            onClick={() => onSelect?.(undefined)}
             key={"Loading"}
           >
             Text
@@ -57,7 +57,8 @@ const CategoryList = ({
                 selectedId === undefined && css.selected,
                 selectedId === undefined && loadingSelected && css.loading
               )}
-              onClick={() => onSelect(undefined)}
+              onClick={() => onSelect?.(undefined)}
+              aria-description={selectedId === undefined ? "selected" : ""}
               key={"All"}
             >
               All
@@ -73,12 +74,13 @@ const CategoryList = ({
                   style={{
                     width: item.name.length * 10 + 20, //estimate and set text to fixed width to prevent size change on fontWeight change, 20 for padding, 8 for character size
                   }}
+                  aria-description={selected ? "selected" : ""}
                   className={classNames(
                     css.item,
-                    selectedId === item.id && css.selected,
+                    selected && css.selected,
                     loading && css.loading
                   )}
-                  onClick={() => onSelect(item.id)}
+                  onClick={() => onSelect?.(item.id)}
                   key={item.id}
                 >
                   {item.name}

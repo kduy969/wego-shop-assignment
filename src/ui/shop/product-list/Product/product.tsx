@@ -11,7 +11,7 @@ type Props = {
 };
 
 const Product = ({ item }: Props) => {
-  let icon = null;
+  let icon;
   let iconBG = "white";
   switch (item.promotion) {
     case "gift":
@@ -28,6 +28,7 @@ const Product = ({ item }: Props) => {
       break;
     default:
       icon = null;
+      iconBG = "transparent";
   }
 
   return (
@@ -36,6 +37,8 @@ const Product = ({ item }: Props) => {
         <img src={item.imageUrl} className={css.image} />
         {!!icon && (
           <span
+            data-testid={`${item.id}-promotion-${item.promotion}`}
+            aria-description={item.promotion || undefined}
             style={{
               background: iconBG,
             }}

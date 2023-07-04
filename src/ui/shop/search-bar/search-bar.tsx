@@ -31,6 +31,7 @@ const SearchBar = ({ className, style, onSubmit, loading }: Props) => {
     >
       <span className={classNames("material-icons", css.icon)}>search</span>
       <input
+        disabled={loading}
         data-testid={"input"}
         value={text}
         maxLength={40}
@@ -39,20 +40,24 @@ const SearchBar = ({ className, style, onSubmit, loading }: Props) => {
           setText(e.target.value);
         }}
         placeholder={"Search by product or restaurant name"}
-        className={css.input}
+        className={classNames(css.input)}
       />
-      <div
-        onClick={onSubmitCB}
-        className={classNames(css.submitBox, !!text && !submitted && css.show)}
-      >
-        <div className={css.text}>Apply search</div>
-        <div className={css.hint}>Press Enter</div>
-      </div>
+      {!!text && !submitted && (
+        <div
+          data-testid={"confirm-box"}
+          onClick={onSubmitCB}
+          className={classNames(css.submitBox)}
+        >
+          <div className={css.text}>Apply search</div>
+          <div className={css.hint}>Press Enter</div>
+        </div>
+      )}
       {loading ? (
         <LoadingAnimation className={css.loading} />
       ) : (
         !!text && (
           <span
+            data-testid={"clear-icon"}
             className={classNames("material-icons", css.clear)}
             onClick={() => {
               setText("");
