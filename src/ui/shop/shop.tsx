@@ -87,6 +87,7 @@ const Shop = ({}: Props) => {
         onSubmit={onFilterSubmit}
       />
       <CategoryList
+        error={categoryError}
         className={css.categoryBox}
         items={categories}
         loading={loadingCategory}
@@ -95,6 +96,7 @@ const Shop = ({}: Props) => {
         onSelect={onCategoryChanged}
       />
       <ProductList
+        error={productError}
         className={css.productsBox}
         loading={!!loadingProduct}
         items={products}
@@ -128,11 +130,11 @@ const Shop = ({}: Props) => {
         >
           +Next page
         </div>
-      ) : (
+      ) : !productError ? (
         <div data-testid={"no-more"} className={css.noMore}>
           {totalProduct > 0 ? `You've watched all item.` : ""}
         </div>
-      )}
+      ) : null}
       <div ref={setBottomRef} className={css.bottomScroll} />
     </div>
   );

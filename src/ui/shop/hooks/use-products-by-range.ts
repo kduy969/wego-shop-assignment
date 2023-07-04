@@ -89,7 +89,8 @@ export const useProductsByRange = (
         }
       } catch (e: any) {
         console.log("error", e?.message);
-        if (myJobId === latestJobId.current) setError("Cannot load products");
+        if (myJobId === latestJobId.current)
+          setError("Please check your connection and try again later.");
       } finally {
         if (myJobId === latestJobId.current) setLoading(false);
       }

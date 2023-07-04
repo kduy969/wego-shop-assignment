@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Shop from "../../src/ui/shop/shop";
-import { expectToBeVisible } from "../utils";
+import { expectNotToBeVisible, expectToBeVisible } from "../utils";
 import { Service } from "../../src/service";
 import fetchMock from "jest-fetch-mock";
 import { Config } from "../../src/config";
@@ -17,7 +17,6 @@ import { ShopConfig } from "../../src/ui/shop/config";
 import { TProduct } from "../../src/api/types";
 import setupTest from "../../src/setup-test/index";
 
-// setup service for calling API
 setupTest();
 
 // enable mocking API
@@ -355,4 +354,39 @@ test("Check load more logic", async () => {
   await tryChangeSearch(config, "Boilicon");
 
   await tryLoadMore(config);
+});
+
+describe("test failed case", () => {
+  beforeEach(() => {
+    // @ts-ignore
+    fetch.mockResponse((req) =>
+      req.url === Config.ProductListURL
+        ? Promise.reject("")
+        : req.url === Config.CategoryListURL
+        ? Promise.reject("")
+        : []
+    );
+  });
+
+  test("Test loading category and category failed", async () => {
+    // load
+    render(<Shop />);
+
+    // wait for initial loading
+    await waitForElementToBeRemoved(() =>
+      screen.queryByTestId("status-product-loading")
+    );
+
+    // should not show any footer content
+    expectNotToBeVisible("load-more");
+    expectNotToBeVisible("no-more");
+    expectNotToBeVisible("next-page");
+
+    // an error should be showed on the screen
+    expectToBeVisible("product-error");
+
+    // category list should be empty
+    const categories = screen.queryAllByTestId("category-item");
+    expect(categories.length).toBe(0);
+  });
 });

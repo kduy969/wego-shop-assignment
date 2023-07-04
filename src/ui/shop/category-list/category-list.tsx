@@ -8,6 +8,7 @@ import load = Simulate.load;
 import LoadingAnimation from "../loading-animation/loading-animation";
 
 type Props = ViewStyle & {
+  error?: string; // error while loading category list
   items: TCategory[];
   selectedId?: string;
   onSelect?: (id: string | undefined) => void;
@@ -23,7 +24,10 @@ const CategoryList = ({
   className,
   loading,
   loadingSelected,
+  error,
 }: Props) => {
+  // keep the loading if category load failed, for now user have to refresh the screen in that case
+  const showLoading = loading || !!error;
   return (
     <div
       data-testid={"category-list"}
@@ -35,7 +39,7 @@ const CategoryList = ({
       )}
     >
       <div className={css.itemsBox}>
-        {loading ? (
+        {showLoading ? (
           <div
             style={{
               width: 100,
