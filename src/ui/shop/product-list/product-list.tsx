@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { TProduct } from "../../../api/types";
 import css from "./product-list.module.scss";
 import Product from "./Product/product";
@@ -7,7 +7,7 @@ import classNames from "classnames";
 
 type Props = ViewStyle & {
   items: TProduct[];
-  loading: boolean;
+  loading: boolean; // this list is being refreshed
 };
 
 const ProductList = ({ items, loading, style, className }: Props) => {

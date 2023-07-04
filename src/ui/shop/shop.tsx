@@ -10,11 +10,17 @@ import ProductList from "./product-list/product-list";
 
 type Props = {};
 
+const test = [];
 const Shop = ({}: Props) => {
   // region take new items on scroll
   const [takeCount, setTakeCount] = useState(ShopConfig.InitialTake);
+  const [pageNumber, setPageNumber] = useState(0);
   const onLoadMore = () => {
     setTakeCount((take) => take + ShopConfig.TakeOnLoadMore);
+  };
+  const onLoadNextPage = () => {
+    setPageNumber((page) => page + 1);
+    setTakeCount(ShopConfig.InitialTake);
   };
   // endregion
 
@@ -24,6 +30,7 @@ const Shop = ({}: Props) => {
     console.log("onFilter", text);
     setFilterText(text);
     // reset take
+    setPageNumber(0);
     setTakeCount(ShopConfig.InitialTake);
   };
   // endregion
@@ -37,23 +44,29 @@ const Shop = ({}: Props) => {
     setSelectedCategoryId(id);
     // reset to initial take on category changed
     setTakeCount(ShopConfig.InitialTake);
+    setPageNumber(0);
   };
   // endregion
 
   // region products
   const [products, totalProduct, productError, loadingProduct, loadingBy] =
-    useProductsByRange(takeCount, filterText, selectedCategoryId);
+    useProductsByRange(pageNumber, takeCount, filterText, selectedCategoryId);
   // endregion
 
   const haveMore = products.length < totalProduct;
+  const pageFulled = products.length >= ShopConfig.PageSize;
+  const showMore = haveMore && !pageFulled;
+  const showNextPage = haveMore && pageFulled;
   return (
     <div className={css.container}>
       <SearchBar
+        key={"search-bar"}
         loading={loadingProduct && loadingBy === "filter"}
         className={css.searchBarBox}
         onSubmit={onFilterSubmit}
       />
       <CategoryList
+        key={"category-list"}
         className={css.categoryBox}
         items={categories}
         loading={loadingCategory}
@@ -62,8 +75,9 @@ const Shop = ({}: Props) => {
         onSelect={onCategoryChanged}
       />
       <ProductList
+        key={"product-list"}
         className={css.productsBox}
-        loading={loadingProduct}
+        loading={!!loadingProduct}
         items={products}
       />
 
@@ -78,13 +92,21 @@ const Shop = ({}: Props) => {
         >
           Loading...
         </div>
-      ) : haveMore ? (
+      ) : showMore ? (
         <div
           data-testid={"load-more"}
           className={css.loadMore}
           onClick={onLoadMore}
         >
           +Show More
+        </div>
+      ) : showNextPage ? (
+        <div
+          data-testid={"load-next-page"}
+          className={css.loadMore}
+          onClick={onLoadNextPage}
+        >
+          +Next page
         </div>
       ) : (
         <div data-testid={"no-more"} className={css.noMore}>

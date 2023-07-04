@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { TCategory, TProduct } from "../../../api/types";
 import { Service } from "../../../service";
 import { usePrevious } from "../../../hooks/usePrevious";
+import { ShopConfig } from "../config";
 
-type TLoadingBy = "takeMore" | "category" | "filter" | "initial";
+type TLoadingBy = "nextPage" | "takeMore" | "category" | "filter" | "initial";
 
 export const useProductsByRange = (
+  pageIndex: number,
   take: number,
   filter: string | undefined,
   categoryId: string | undefined
@@ -18,6 +20,7 @@ export const useProductsByRange = (
   const previousTake = usePrevious(take);
   const previousCategoryId = usePrevious(categoryId);
   const previousFilter = usePrevious(filter);
+  const previousPage = usePrevious(pageIndex);
 
   // save the latest running job id -> ignore job result if jobId !== latestJobId
   const latestJobId = useRef<number>(0);
@@ -36,10 +39,15 @@ export const useProductsByRange = (
         //   previousFilter,
         // });
         const loadingByTemp =
-          !previousTake && !previousCategoryId && !previousFilter // no previous data -> initial loading
+          !previousTake &&
+          !previousCategoryId &&
+          !previousFilter &&
+          !previousPage // no previous data -> initial loading
             ? "initial"
             : (previousTake || 0) < take // when user what to take more item
             ? "takeMore"
+            : (previousPage || 0) < pageIndex // when user press load next page
+            ? "nextPage"
             : previousCategoryId !== categoryId // when user change category
             ? "category"
             : previousFilter !== filter // when user change filter
@@ -51,7 +59,7 @@ export const useProductsByRange = (
           // only load new items from last position
           const { products: additionalItems, total: newTotal } =
             await Service.API.getProductsByRange(
-              previousTake || 0,
+              pageIndex * ShopConfig.PageSize + (previousTake || 0),
               take - (previousTake || 0),
               filter,
               categoryId
@@ -61,9 +69,14 @@ export const useProductsByRange = (
             setTotal(newTotal);
           }
         } else {
-          // load from beginning
+          // for every other case, load from beginning of current page
           const { products: newItems, total: newTotal } =
-            await Service.API.getProductsByRange(0, take, filter, categoryId);
+            await Service.API.getProductsByRange(
+              pageIndex * ShopConfig.PageSize,
+              take,
+              filter,
+              categoryId
+            );
           if (myJobId === latestJobId.current) {
             setProducts(newItems);
             setTotal(newTotal);
@@ -76,6 +89,6 @@ export const useProductsByRange = (
         if (myJobId === latestJobId.current) setLoading(false);
       }
     })();
-  }, [take, filter, categoryId]);
+  }, [take, pageIndex, filter, categoryId]);
   return [products, total, error, loading, loadingBy];
 };
