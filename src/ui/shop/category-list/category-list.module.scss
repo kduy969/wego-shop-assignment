@@ -18,7 +18,6 @@
     justify-content: flex-start;
     border: 1px $accent-color solid;
     border-radius: 6px;
-    margin-right: 10px;
     flex-wrap: wrap;
 }
 
@@ -31,6 +30,7 @@
     font-size: 0.9rem;
     cursor: pointer;
     position: relative;
+    flex-grow: 1; // allow item to grow to fill parent space up
 }
 
 .item.loading {

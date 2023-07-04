@@ -75,6 +75,7 @@ const CategoryList = ({
               return (
                 <div
                   style={{
+                    maxWidth: item.name.length * 10 + 20 + 6, // item can grow to fill parent -> need to limit max item size
                     width: item.name.length * 10 + 20, //estimate and set text to fixed width to prevent size change on fontWeight change, 20 for padding, 10 for character size
                   }}
                   aria-checked={!!selected}
