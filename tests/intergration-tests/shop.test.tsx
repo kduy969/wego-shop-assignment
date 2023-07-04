@@ -15,9 +15,10 @@ import { Config } from "../../src/config";
 import { TestCategoryList, TestProductList } from "../test-data";
 import { ShopConfig } from "../../src/ui/shop/config";
 import { TProduct } from "../../src/api/types";
+import setupTest from "../../src/setup-test/index";
 
 // setup service for calling API
-Service.init();
+setupTest();
 
 // enable mocking API
 fetchMock.enableMocks();
