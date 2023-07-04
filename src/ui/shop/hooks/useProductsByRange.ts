@@ -6,7 +6,6 @@ import { usePrevious } from "../../../hooks/usePrevious";
 type TLoadingBy = "takeMore" | "category" | "filter" | "initial";
 
 export const useProductsByRange = (
-  skip: number,
   take: number,
   filter: string | undefined,
   categoryId: string | undefined
@@ -28,6 +27,14 @@ export const useProductsByRange = (
       const myJobId = latestJobId.current + 1;
       latestJobId.current = myJobId;
       try {
+        // console.log("query for", {
+        //   take,
+        //   filter,
+        //   categoryId,
+        //   previousTake,
+        //   previousCategoryId,
+        //   previousFilter,
+        // });
         const loadingByTemp =
           !previousTake && !previousCategoryId && !previousFilter // no previous data -> initial loading
             ? "initial"
@@ -40,7 +47,7 @@ export const useProductsByRange = (
             : "initial";
         setLoadingBy(loadingByTemp);
         setLoading(true);
-        if (loadingBy === "takeMore") {
+        if (loadingByTemp === "takeMore") {
           // only load new items from last position
           const { products: additionalItems, total: newTotal } =
             await Service.API.getProductsByRange(
@@ -56,23 +63,19 @@ export const useProductsByRange = (
         } else {
           // load from beginning
           const { products: newItems, total: newTotal } =
-            await Service.API.getProductsByRange(
-              skip,
-              take,
-              filter,
-              categoryId
-            );
+            await Service.API.getProductsByRange(0, take, filter, categoryId);
           if (myJobId === latestJobId.current) {
             setProducts(newItems);
             setTotal(newTotal);
           }
         }
-      } catch (e) {
+      } catch (e: any) {
+        console.log("error", e?.message);
         if (myJobId === latestJobId.current) setError("Cannot load products");
       } finally {
         if (myJobId === latestJobId.current) setLoading(false);
       }
     })();
-  }, [skip, take, filter, categoryId]);
+  }, [take, filter, categoryId]);
   return [products, total, error, loading, loadingBy];
 };
