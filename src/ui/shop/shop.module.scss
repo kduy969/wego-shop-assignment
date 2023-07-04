@@ -1,9 +1,10 @@
 @import './style.scss';
 
+
 .container {
   display: flex;
-  width: calc(100vw - 40px);
-  height: calc(100vh - 40px);
+  width: calc(100% - 40px);
+  height: calc(100svh - 40px);
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -40,7 +41,8 @@
   color: $text-color;
   font-weight: bold;
   font-size: 0.7rem;
-  padding: 6px 20px;
+  padding: 6px 0px;
+  width: 130px;// fixed width to prevent size change on text update
   cursor: pointer;
   transition: opacity 0.2s ease;
   opacity: 0.85;
@@ -56,6 +58,13 @@
   align-self: center;
   color: $text-color;
   font-size: 0.9rem;
+}
+
+.bottomScroll {
+  display: flex;
+  align-self: center;
+  height: 20px;
+  width: 100px;
 }
 
 
