@@ -155,7 +155,7 @@ const Shop = ({}: Props) => {
         </div>
       ) : !productError ? (
         <div data-testid={"no-more"} className={css.noMore}>
-          {totalProduct > 0 ? `You've watched all item.` : ""}
+          {totalProduct > 0 ? `You've watched all items.` : ""}
         </div>
       ) : null}
     </div>

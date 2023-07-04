@@ -6,6 +6,7 @@ import { ViewStyle } from "../../base-types/view-style";
 import classNames from "classnames";
 import { Simulate } from "react-dom/test-utils";
 import error = Simulate.error;
+import ProductFake from "./Product/product-fake";
 
 type Props = ViewStyle & {
   error?: string;
@@ -63,6 +64,10 @@ const ProductList = ({ items, loading, style, className, error }: Props) => {
     >
       {items.map((i) => (
         <Product item={i} key={i.id} />
+      ))}
+
+      {[1, 2, 3, 4, 5].map(() => (
+        <ProductFake />
       ))}
     </div>
   );
