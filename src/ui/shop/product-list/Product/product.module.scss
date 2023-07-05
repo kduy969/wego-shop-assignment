@@ -4,7 +4,7 @@
   display: flex;
   width: 180px;
   max-width: 350px;
-  flex-grow: 1; // grow from 150px to 350px/parent width if there is any available space in parent
+  flex-grow: 1; // grow from 150px to 350px if there is any available space in parent
   background: white;
   margin: 4px;
   border-radius: 10px;
@@ -26,15 +26,6 @@
   }
 }
 
-.container.fake {
-  opacity: 0;
-  animation: none;
-  transition: none;
-  box-shadow: none;
-  pointer-events: none;
-
-}
-
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -44,6 +35,16 @@
     opacity: 1;
   }
 }
+
+.container.fake {
+  opacity: 0;
+  animation: none;
+  transition: none;
+  box-shadow: none;
+  pointer-events: none;
+
+}
+
 
 // card hover effect
 .container::after {

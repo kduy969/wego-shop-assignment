@@ -77,6 +77,7 @@ const Shop = ({}: Props) => {
   const pageFulled = products.length >= ShopConfig.PageSize;
   const showMore = haveMore && !pageFulled && !showRetry && !loadingProduct;
   const showNextPage = haveMore && pageFulled && !showRetry && !loadingProduct;
+  const showNoMore = !haveMore && !productError;
 
   // auto load more
   const [setBottomRef] = useLoadMoreOnScrollBottom(showMore, onLoadMore);
@@ -151,7 +152,7 @@ const Shop = ({}: Props) => {
         >
           +Next page
         </div>
-      ) : !productError ? (
+      ) : showNoMore ? (
         <div data-testid={"no-more"} className={css.noMore}>
           {totalProduct > 0 ? `You've watched all items.` : ""}
         </div>
