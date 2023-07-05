@@ -35,11 +35,11 @@ const Shop = ({}: Props) => {
 
   // region handle search
   const [filterText, setFilterText] = useState<string>("");
-  const onFilterSubmit = (text: string) => {
+  const onFilterSubmit = useCallback((text: string) => {
     setFilterText(text);
     setPageNumber(0);
     setTakeCount(ShopConfig.InitialTake);
-  };
+  }, []);
   // endregion
 
   // region handle category
@@ -47,12 +47,12 @@ const Shop = ({}: Props) => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<
     string | undefined
   >();
-  const onCategoryChanged = (id: string | undefined) => {
+  const onCategoryChanged = useCallback((id: string | undefined) => {
     setSelectedCategoryId(id);
     // reset to initial take on category changed
     setTakeCount(ShopConfig.InitialTake);
     setPageNumber(0);
-  };
+  }, []);
   // endregion
 
   // region load products
