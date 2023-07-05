@@ -43,14 +43,6 @@ export const useProductsByRange = (
       const myJobId = latestJobId.current + 1;
       latestJobId.current = myJobId;
       try {
-        // console.log("query for", {
-        //   take,
-        //   filter,
-        //   categoryId,
-        //   previousTake,
-        //   previousCategoryId,
-        //   previousFilter,
-        // });
         const isReSync =
           previousSyncId !== undefined && reSyncId !== previousSyncId;
 
@@ -107,7 +99,6 @@ export const useProductsByRange = (
           }
         }
       } catch (e: any) {
-        console.log("error", e?.message);
         if (myJobId === latestJobId.current)
           setError("Please check your connection and try again later.");
       } finally {
