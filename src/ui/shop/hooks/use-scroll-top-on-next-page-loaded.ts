@@ -16,7 +16,7 @@ export function useScrollTopOnNextPageLoaded(
           left: 0,
           behavior: "smooth",
         });
-      }, 500);
+      }, 400);
     }
   }, [loadingProduct]);
 }
