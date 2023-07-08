@@ -10,31 +10,40 @@ import "@testing-library/jest-dom";
 import Shop from "../../src/ui/shop/shop";
 import { expectNotToBeVisible, expectToBeVisible } from "../utils";
 import fetchMock, { FetchMock } from "jest-fetch-mock";
-import { Config } from "../../src/config";
+
 import { TestCategoryList, TestProductList } from "../test-data";
-import { ShopConfig } from "../../src/ui/shop/config";
+
 import {
   checkEverything,
-  InitialMockState,
   mockAllAPIFail,
   mockAllAPISuccess,
   mockOnlyProductAPIFail,
-  ShopMockState,
-  tryChangeCategoryThenCheck,
-  tryChangeSearchAndCheck,
+  changeCategoryThenCheck,
+  changeSearchAndCheck,
   tryLoadMoreFailThenCheck,
   tryLoadMoreThenCheck,
   tryLoadNextPageThenCheck,
-  tryRetryThenCheck,
+  tryRetryLoadMoreThenCheck,
   tryRetryFailThenCheck,
 } from "./shop.test.helper";
 
 // setup environment for test
 import setupTest from "../../src/setup-test/index";
+import { ShopSimulate, ShopState } from "./shop-state";
+import { ShopConfig } from "../../src/ui/shop/config";
 
 setupTest();
 // enable mocking API
 fetchMock.enableMocks();
+
+// the state of the shop after successful initial load
+export const InitialShopState: ShopState = {
+  search: "",
+  categoryId: "all",
+  pageIndex: 0,
+  count: ShopConfig.InitialTake,
+  pageSize: ShopConfig.PageSize,
+};
 
 describe("Test common cases for shop", () => {
   beforeAll(() => {
@@ -63,11 +72,15 @@ describe("Test common cases for shop", () => {
 
     expectToBeVisible("product-list");
 
-    let mockState: ShopMockState = {
-      ...InitialMockState,
-    };
+    let config = new ShopSimulate(
+      {
+        ...InitialShopState,
+      },
+      TestProductList,
+      TestCategoryList
+    );
 
-    checkEverything(mockState);
+    checkEverything(config);
   });
 
   test("Check filter by product name", async () => {
@@ -76,15 +89,19 @@ describe("Test common cases for shop", () => {
       screen.queryByTestId("status-product-loading")
     );
 
-    let config: ShopMockState = {
-      ...InitialMockState,
-    };
+    let shopSimulate = new ShopSimulate(
+      {
+        ...InitialShopState,
+      },
+      TestProductList,
+      TestCategoryList
+    );
 
-    await tryChangeSearchAndCheck(config, "Drinks");
+    await changeSearchAndCheck(shopSimulate, "Drinks");
 
-    await tryChangeSearchAndCheck(config, "maineland");
+    await changeSearchAndCheck(shopSimulate, "maineland");
 
-    await tryChangeSearchAndCheck(config, "");
+    await changeSearchAndCheck(shopSimulate, "");
   });
 
   test("Check filter by category", async () => {
@@ -93,24 +110,25 @@ describe("Test common cases for shop", () => {
       screen.queryByTestId("status-product-loading")
     );
 
-    let config: ShopMockState = {
-      search: "",
-      categoryId: "all",
-      pageIndex: 0,
-      count: ShopConfig.InitialTake,
-    };
+    let shopSimulate = new ShopSimulate(
+      {
+        ...InitialShopState,
+      },
+      TestProductList,
+      TestCategoryList
+    );
 
     // change category to Sushi
-    await tryChangeCategoryThenCheck(config, "6288a89f1f0152b8c2cd512b");
+    await changeCategoryThenCheck(shopSimulate, "6288a89f1f0152b8c2cd512b");
 
     // desert
-    await tryChangeCategoryThenCheck(config, "6288a89fe6c2fe0b758360fe");
+    await changeCategoryThenCheck(shopSimulate, "6288a89fe6c2fe0b758360fe");
 
     // change to all
-    await tryChangeCategoryThenCheck(config, "all");
+    await changeCategoryThenCheck(shopSimulate, "all");
 
     // change category to drinks and check product list
-    await tryChangeCategoryThenCheck(config, "6288a89fac9e970731bfaa7b");
+    await changeCategoryThenCheck(shopSimulate, "6288a89fac9e970731bfaa7b");
   });
 
   test("Check filter by category and search", async () => {
@@ -119,37 +137,38 @@ describe("Test common cases for shop", () => {
       screen.queryByTestId("status-product-loading")
     );
 
-    let config: ShopMockState = {
-      search: "",
-      categoryId: "all",
-      pageIndex: 0,
-      count: ShopConfig.InitialTake,
-    };
+    let shopSimulate = new ShopSimulate(
+      {
+        ...InitialShopState,
+      },
+      TestProductList,
+      TestCategoryList
+    );
 
     // search -> cate -> reset search -> reset cate -> to initial load
 
-    await tryChangeSearchAndCheck(config, "maineland");
+    await changeSearchAndCheck(shopSimulate, "maineland");
 
     // pizza category
-    await tryChangeCategoryThenCheck(config, "6288a89f7338764f2071a8a8");
+    await changeCategoryThenCheck(shopSimulate, "6288a89f7338764f2071a8a8");
 
     // reset search
-    await tryChangeSearchAndCheck(config, "");
+    await changeSearchAndCheck(shopSimulate, "");
 
     // reset category
-    await tryChangeCategoryThenCheck(config, "all");
+    await changeCategoryThenCheck(shopSimulate, "all");
 
     // cate -> search -> search -> cate
 
     // desserts category
-    await tryChangeCategoryThenCheck(config, "6288a89fe6c2fe0b758360fe");
+    await changeCategoryThenCheck(shopSimulate, "6288a89fe6c2fe0b758360fe");
 
-    await tryChangeSearchAndCheck(config, "niquent");
+    await changeSearchAndCheck(shopSimulate, "niquent");
 
-    await tryChangeSearchAndCheck(config, "zentia");
+    await changeSearchAndCheck(shopSimulate, "zentia");
 
     // hot meals category
-    await tryChangeCategoryThenCheck(config, "6288a89f70dc8cf93b71609b");
+    await changeCategoryThenCheck(shopSimulate, "6288a89f70dc8cf93b71609b");
   });
 
   test("Check load more logic", async () => {
@@ -161,34 +180,35 @@ describe("Test common cases for shop", () => {
     // should show load more
     expectToBeVisible("load-more");
 
-    let config: ShopMockState = {
-      search: "",
-      categoryId: "all",
-      pageIndex: 0,
-      count: ShopConfig.InitialTake,
-    };
+    let shopSimulate = new ShopSimulate(
+      {
+        ...InitialShopState,
+      },
+      TestProductList,
+      TestCategoryList
+    );
 
-    await tryLoadMoreThenCheck(config);
+    await tryLoadMoreThenCheck(shopSimulate);
 
-    await tryLoadMoreThenCheck(config);
+    await tryLoadMoreThenCheck(shopSimulate);
 
-    await tryLoadMoreThenCheck(config);
+    await tryLoadMoreThenCheck(shopSimulate);
 
-    await tryLoadNextPageThenCheck(config);
+    await tryLoadNextPageThenCheck(shopSimulate);
 
-    await tryChangeCategoryThenCheck(config, "6288a89f1f0152b8c2cd512b");
+    await changeCategoryThenCheck(shopSimulate, "6288a89f1f0152b8c2cd512b");
 
-    await tryLoadMoreThenCheck(config);
+    await tryLoadMoreThenCheck(shopSimulate);
 
-    await tryLoadMoreThenCheck(config);
+    await tryLoadMoreThenCheck(shopSimulate);
 
-    await tryLoadMoreThenCheck(config);
+    await tryLoadMoreThenCheck(shopSimulate);
 
-    await tryLoadNextPageThenCheck(config);
+    await tryLoadNextPageThenCheck(shopSimulate);
 
-    await tryChangeSearchAndCheck(config, "Boilicon");
+    await changeSearchAndCheck(shopSimulate, "Boilicon");
 
-    await tryLoadMoreThenCheck(config);
+    await tryLoadMoreThenCheck(shopSimulate);
   });
 });
 
@@ -224,22 +244,25 @@ describe("Test edge cases for shop", () => {
     mockAllAPISuccess();
     render(<Shop />);
 
-    const config: ShopMockState = {
-      ...InitialMockState,
-    };
+    let shopSimulate = new ShopSimulate(
+      {
+        ...InitialShopState,
+      },
+      TestProductList,
+      TestCategoryList
+    );
 
     // wait for initial loading to finish
     await waitForElementToBeRemoved(() =>
       screen.queryByTestId("status-product-loading")
     );
-
-    // make product API fail for load more and check the result
+    // make the next load more calls to fail and check the result
     mockOnlyProductAPIFail();
-    await tryLoadMoreFailThenCheck(config);
-    await tryRetryFailThenCheck(config);
+    await tryLoadMoreFailThenCheck(shopSimulate);
+    await tryRetryFailThenCheck(shopSimulate);
 
-    // make next retry call to succeed and check the result
+    // make the next retry call to succeed and check the result
     mockAllAPISuccess();
-    await tryRetryThenCheck(config);
+    await tryRetryLoadMoreThenCheck(shopSimulate);
   });
 });

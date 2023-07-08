@@ -6,36 +6,11 @@ import {
   waitForElementToBeRemoved,
 } from "@testing-library/react";
 import { TestCategoryList, TestProductList } from "../test-data";
-import { ShopConfig } from "../../src/ui/shop/config";
 import { TProduct } from "../../src/api/types";
 import { FetchMock } from "jest-fetch-mock";
 import { Config } from "../../src/config";
-
-// object of this type used to hold the current expected UI state of the shop component.
-// After performing an action we can update the expected state
-// then validate if the expected UI state matches with the test UI
-
-// example: for expected state = {
-//   search: "Pepsi",
-//   categoryId: "Drink",
-//   pageIndex: 0,
-//   count: 10,
-// }
-// the current UI should show 10 products on screen that have "pepsi" in their name
-// and belong to "Drink" category
-export type ShopMockState = {
-  search: string;
-  categoryId: string;
-  count: number;
-  pageIndex: number;
-};
-
-export const InitialMockState = {
-  search: "",
-  categoryId: "all",
-  pageIndex: 0,
-  count: ShopConfig.InitialTake,
-};
+import { ShopSimulate, ShopState } from "./shop-state";
+import { ShopConfig } from "../../src/ui/shop/config";
 
 // mock utils
 export function mockAllAPISuccess() {
@@ -114,13 +89,8 @@ export function expectToSeeProductsWithQuantity(num: number) {
   expect(products.length).toBe(num);
 }
 
-export function getExpectedItems(config: ShopMockState) {
-  return TestProductList.filter((p) =>
-    isProductMatch(p, config.categoryId, config.search)
-  ).slice(config.pageIndex * ShopConfig.PageSize, config.count);
-}
-export function expectAllProductsMatch(config: ShopMockState) {
-  const expectedItems = getExpectedItems(config);
+export function expectAllProductsMatch(shopSimulate: ShopSimulate) {
+  const expectedItems = shopSimulate.getExpectedItems();
   const productNames = screen.queryAllByTestId("product-name");
   const categories = screen.queryAllByTestId("product-category");
 
@@ -154,9 +124,9 @@ export function isProductMatch(
   return matchedCategory && matchedFilter;
 }
 
-export function checkEverything(config: ShopMockState) {
-  expectToSeeProductsWithQuantity(config.count);
-  expectAllProductsMatch(config);
+export function checkEverything(shopSimulate: ShopSimulate) {
+  expectToSeeProductsWithQuantity(shopSimulate.state.count);
+  expectAllProductsMatch(shopSimulate);
 }
 
 export function getProductCount(filter: string, categoryId: string) {
@@ -164,11 +134,8 @@ export function getProductCount(filter: string, categoryId: string) {
     .length;
 }
 
-export async function tryLoadMoreFailThenCheck(config: ShopMockState) {
-  const total = getProductCount(config.search, config.categoryId);
-  const taken = config.pageIndex * ShopConfig.PageSize + config.count;
-  const pageFulled = config.count >= ShopConfig.PageSize;
-  if (taken >= total || pageFulled) {
+export async function tryLoadMoreFailThenCheck(shopSimulate: ShopSimulate) {
+  if (!shopSimulate.canLoadMore()) {
     console.log("Cannot load more");
     return false;
   }
@@ -178,51 +145,40 @@ export async function tryLoadMoreFailThenCheck(config: ShopMockState) {
   expectToBeVisible("retry-now");
 }
 
-export async function tryLoadMoreThenCheck(config: ShopMockState) {
-  const total = getProductCount(config.search, config.categoryId);
-  const taken = config.pageIndex * ShopConfig.PageSize + config.count;
-  const pageFulled = config.count >= ShopConfig.PageSize;
-  if (taken >= total || pageFulled) {
+export async function tryLoadMoreThenCheck(shopSimulate: ShopSimulate) {
+  if (!shopSimulate.canLoadMore()) {
     console.log("Prevent impossible load more action");
     return false;
   }
 
-  const remaining = total - taken;
-  const loadCount = Math.min(ShopConfig.TakeOnLoadMore, remaining);
-
   // load more and check
   await waitForLoadMore();
-  config.count += loadCount;
-  checkEverything(config);
+  shopSimulate.loadMore();
+  checkEverything(shopSimulate);
 }
 
-export async function tryLoadNextPageThenCheck(config: ShopMockState) {
-  const total = getProductCount(config.search, config.categoryId);
-  const taken = config.pageIndex * ShopConfig.PageSize + config.count;
-  const pageFulled = config.count >= ShopConfig.PageSize;
-  if (taken >= total || !pageFulled) {
+export async function tryLoadNextPageThenCheck(shopSimulate: ShopSimulate) {
+  if (!shopSimulate.shouldShowNextPageButton()) {
     console.log("Cannot go next page");
     return false;
   }
 
-  const remaining = total - taken;
-  const loadCount = Math.min(ShopConfig.InitialTake, remaining);
-
   // load and check
   await waitForLoadNextPage();
-  config.count = loadCount;
-  config.pageIndex += 1;
-  checkEverything(config);
+  shopSimulate.changePageTo(shopSimulate.state.pageIndex + 1);
+  checkEverything(shopSimulate);
 }
 
-export async function tryRetryThenCheck(config: ShopMockState) {
+export async function tryRetryLoadMoreThenCheck(shopSimulate: ShopSimulate) {
   const retry = expectToBeVisible("retry-now");
   fireEvent.click(retry);
   await waitForFinishNextLoading();
-  checkEverything(config);
+
+  shopSimulate.loadMore();
+  checkEverything(shopSimulate);
 }
 
-export async function tryRetryFailThenCheck(config: ShopMockState) {
+export async function tryRetryFailThenCheck(shopSimulate: ShopSimulate) {
   const retry = expectToBeVisible("retry-now");
   fireEvent.click(retry);
   await waitForFinishNextLoading();
@@ -231,32 +187,20 @@ export async function tryRetryFailThenCheck(config: ShopMockState) {
   expectToBeVisible("retry-now");
 }
 
-export async function tryChangeCategoryThenCheck(
-  config: ShopMockState,
+export async function changeCategoryThenCheck(
+  shopSimulate: ShopSimulate,
   categoryId: string
 ) {
   await updateCategoryAndSubmit(categoryId);
-
-  // get next expected config
-  const total = getProductCount(config.search, categoryId);
-  config.pageIndex = 0;
-  config.count = Math.min(total, ShopConfig.InitialTake);
-  config.categoryId = categoryId;
-
-  checkEverything(config);
+  shopSimulate.changeCategory(categoryId);
+  checkEverything(shopSimulate);
 }
 
-export async function tryChangeSearchAndCheck(
-  config: ShopMockState,
+export async function changeSearchAndCheck(
+  shopSimulate: ShopSimulate,
   search: string
 ) {
   await updateSearchAndSubmit(search);
-
-  // get next expected config
-  const total = getProductCount(search, config.categoryId);
-  config.pageIndex = 0;
-  config.count = Math.min(total, ShopConfig.InitialTake);
-  config.search = search;
-
-  checkEverything(config);
+  shopSimulate.changeFilter(search);
+  checkEverything(shopSimulate);
 }
