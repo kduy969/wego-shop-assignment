@@ -1,5 +1,5 @@
 import { RefObject, useEffect } from "react";
-import { TLoadingBy } from "./use-products-by-range";
+import { TLoadingBy } from "../shop";
 
 export function useScrollTopOnNextPageLoaded(
   loadingProduct: boolean,

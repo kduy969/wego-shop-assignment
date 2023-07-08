@@ -37,7 +37,9 @@ export class FakeApi implements ApiInterface {
 
     // return result base on filtered list
     return {
-      products: filteredProducts.slice(skip, skip + take),
+      products: filteredProducts
+        .map((p, index) => ({ ...p, index }))
+        .slice(skip, skip + take),
       total: filteredProducts.length,
     };
   }

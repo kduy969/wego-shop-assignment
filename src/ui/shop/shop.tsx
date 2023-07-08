@@ -9,7 +9,7 @@ import css from "./shop.module.scss";
 import { ShopConfig } from "./config";
 
 import { useCategories } from "./hooks/use-categories";
-import { useProductsByRange } from "./hooks/use-products-by-range";
+import { useProducts } from "./hooks/use-products";
 import SearchBar from "./search-bar/search-bar";
 import CategoryList from "./category-list/category-list";
 import ProductList from "./product-list/product-list";
@@ -19,16 +19,27 @@ import { useLoadMoreOnScrollBottom } from "./hooks/use-load-more-on-scroll-botto
 
 type Props = {};
 
+export type TLoadingBy =
+  | "nextPage"
+  | "takeMore"
+  | "category"
+  | "filter"
+  | "initial";
+
 const Shop = ({}: Props) => {
+  const [loadingBy, setLoadingBy] = useState<TLoadingBy>("initial");
   // region handle pagination
-  const [takeCount, setTakeCount] = useState(ShopConfig.InitialTake);
-  const [pageNumber, setPageNumber] = useState(0);
-  const onLoadMore = () => {
-    setTakeCount((take) => take + ShopConfig.TakeOnLoadMore);
-  };
+  const [pageTake, setPageTake] = useState(ShopConfig.InitialTake);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState<number>(ShopConfig.PageSize);
+  const onLoadMore = useCallback(() => {
+    setLoadingBy("takeMore");
+    setPageTake((take) => Math.min(take + ShopConfig.TakeOnLoadMore, pageSize));
+  }, [pageSize]);
   const onLoadNextPage = () => {
-    setPageNumber((page) => page + 1);
-    setTakeCount(ShopConfig.InitialTake);
+    setLoadingBy("nextPage");
+    setPageIndex((page) => page + 1);
+    setPageTake(ShopConfig.InitialTake);
   };
 
   // endregion
@@ -36,9 +47,10 @@ const Shop = ({}: Props) => {
   // region handle search
   const [filterText, setFilterText] = useState<string>("");
   const onFilterSubmit = useCallback((text: string) => {
+    setLoadingBy("filter");
     setFilterText(text);
-    setPageNumber(0);
-    setTakeCount(ShopConfig.InitialTake);
+    setPageIndex(0);
+    setPageTake(ShopConfig.InitialTake);
   }, []);
   // endregion
 
@@ -48,22 +60,28 @@ const Shop = ({}: Props) => {
     string | undefined
   >();
   const onCategoryChanged = useCallback((id: string | undefined) => {
+    setLoadingBy("category");
     setSelectedCategoryId(id);
     // reset to initial take on category changed
-    setTakeCount(ShopConfig.InitialTake);
-    setPageNumber(0);
+    setPageTake(ShopConfig.InitialTake);
+    setPageIndex(0);
   }, []);
   // endregion
 
-  // region load products
+  // region sync products
   const [
     products,
     totalProduct,
     productError,
     loadingProduct,
-    loadingBy,
-    reTryLoadProduct,
-  ] = useProductsByRange(pageNumber, takeCount, filterText, selectedCategoryId);
+    retrySyncProducts,
+  ] = useProducts(
+    pageIndex,
+    pageSize,
+    pageTake,
+    filterText,
+    selectedCategoryId
+  );
   // endregion
 
   // user make takeMore/nextPage action lead to load product error -> show refresh button to allow user to retry
@@ -72,9 +90,9 @@ const Shop = ({}: Props) => {
     productError
   );
 
-  const taken = products.length + pageNumber * ShopConfig.PageSize;
+  const taken = products.length + pageIndex * pageSize;
   const haveMore = taken < totalProduct;
-  const pageFulled = products.length >= ShopConfig.PageSize;
+  const pageFulled = products.length >= pageSize;
   const showMore = haveMore && !pageFulled && !showRetry && !loadingProduct;
   const showNextPage = haveMore && pageFulled && !showRetry && !loadingProduct;
   const showNoMore = !haveMore && !productError;
@@ -132,7 +150,7 @@ const Shop = ({}: Props) => {
         <div
           data-testid={"retry-now"}
           className={css.loadMore}
-          onClick={reTryLoadProduct}
+          onClick={retrySyncProducts}
         >
           Retry now
         </div>
