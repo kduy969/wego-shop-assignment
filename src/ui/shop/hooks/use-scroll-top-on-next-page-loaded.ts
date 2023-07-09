@@ -9,7 +9,7 @@ export function useScrollTopOnNextPageLoaded(
 ) {
   useEffect(() => {
     // scroll to top if load new products successfully from "nextPage" action
-    if (!loadingProduct && loadingBy === "nextPage" && !productError) {
+    if (!loadingProduct && loadingBy === "changePage" && !productError) {
       setTimeout(() => {
         scrollRef.current?.scrollTo?.({
           top: 0,

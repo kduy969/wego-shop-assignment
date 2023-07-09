@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { TCategory } from "../../../api/types";
 import css from "./category-list.module.scss";
 import { ViewStyle } from "../../base-types/view-style";
@@ -27,6 +27,12 @@ const CategoryList = ({
 }: Props) => {
   // keep the loading if category load failed, for now user have to refresh the screen in that case
   const showLoading = loading || !!error;
+  const onSelectCB = useCallback(
+    (id: string | undefined) => {
+      if (id !== selectedId) onSelect?.(id);
+    },
+    [selectedId, onSelect]
+  );
   return (
     <div
       data-testid={"category-list"}
@@ -44,7 +50,7 @@ const CategoryList = ({
               width: 100,
             }}
             className={classNames(css.item, css.loading)}
-            onClick={() => onSelect?.(undefined)}
+            onClick={() => onSelectCB(undefined)}
             key={"Loading"}
           >
             Text
@@ -61,7 +67,7 @@ const CategoryList = ({
                 selectedId === undefined && css.selected,
                 selectedId === undefined && loadingSelected && css.loading
               )}
-              onClick={() => onSelect?.(undefined)}
+              onClick={() => onSelectCB(undefined)}
               aria-checked={selectedId === undefined}
               key={"All"}
               data-testid={"category-item"}
@@ -89,7 +95,7 @@ const CategoryList = ({
                   )}
                   data-testid={"category-item"}
                   aria-description={item.id}
-                  onClick={() => onSelect?.(item.id)}
+                  onClick={() => onSelectCB(item.id)}
                   key={item.id}
                 >
                   {item.name}

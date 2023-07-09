@@ -1,4 +1,8 @@
-import { expectToBeVisible } from "../utils";
+import {
+  expectToBeInDocument,
+  expectToBeVisible,
+  mockScrollToBottom,
+} from "../utils";
 import {
   fireEvent,
   screen,
@@ -9,7 +13,7 @@ import { TestCategoryList, TestProductList } from "../test-data";
 import { TProduct } from "../../src/api/types";
 import { FetchMock } from "jest-fetch-mock";
 import { Config } from "../../src/config";
-import { ShopSimulate, ShopState } from "./shop-state";
+import { ShopSimulate, ShopState } from "./shop-simulate";
 import { ShopConfig } from "../../src/ui/shop/config";
 
 // mock utils
@@ -101,14 +105,21 @@ export function expectAllProductsMatch(shopSimulate: ShopSimulate) {
 }
 
 export async function waitForLoadMore() {
-  const loadMore = expectToBeVisible("load-more");
-  fireEvent.click(loadMore);
+  const scrollView = expectToBeVisible("scroll-view");
+  mockScrollToBottom(scrollView);
   await waitForFinishNextLoading();
 }
 
-export async function waitForLoadNextPage() {
-  const loadNextPage = expectToBeVisible("load-next-page");
-  fireEvent.click(loadNextPage);
+export async function waitForLoadNextPage(shopSimulate: ShopSimulate) {
+  // find next page button
+  const paginations = screen.queryAllByTestId("pagination-item");
+  const nextPageButton = paginations.find(
+    (n) =>
+      n.getAttribute("aria-description") === shopSimulate.getNextPage() + ""
+  );
+  expect(nextPageButton).toBeTruthy();
+
+  fireEvent.click(nextPageButton as HTMLElement);
   await waitForFinishNextLoading();
 }
 
@@ -127,6 +138,7 @@ export function isProductMatch(
 export function checkEverything(shopSimulate: ShopSimulate) {
   expectToSeeProductsWithQuantity(shopSimulate.state.count);
   expectAllProductsMatch(shopSimulate);
+  checkNavigationBar(shopSimulate);
 }
 
 export function getProductCount(filter: string, categoryId: string) {
@@ -147,7 +159,6 @@ export async function tryLoadMoreFailThenCheck(shopSimulate: ShopSimulate) {
 
 export async function tryLoadMoreThenCheck(shopSimulate: ShopSimulate) {
   if (!shopSimulate.canLoadMore()) {
-    console.log("Prevent impossible load more action");
     return false;
   }
 
@@ -158,13 +169,12 @@ export async function tryLoadMoreThenCheck(shopSimulate: ShopSimulate) {
 }
 
 export async function tryLoadNextPageThenCheck(shopSimulate: ShopSimulate) {
-  if (!shopSimulate.shouldShowNextPageButton()) {
-    console.log("Cannot go next page");
+  if (!shopSimulate.canGoNextPage()) {
     return false;
   }
 
   // load and check
-  await waitForLoadNextPage();
+  await waitForLoadNextPage(shopSimulate);
   shopSimulate.changePageTo(shopSimulate.state.pageIndex + 1);
   checkEverything(shopSimulate);
 }
@@ -203,4 +213,36 @@ export async function changeSearchAndCheck(
   await updateSearchAndSubmit(search);
   shopSimulate.changeFilter(search);
   checkEverything(shopSimulate);
+}
+
+export function checkNavigationBar(shopSimulate: ShopSimulate) {
+  if (!shopSimulate.shouldPaginationBarVisible()) {
+    return;
+  }
+
+  // should visible
+  expectToBeInDocument("pagination-bar");
+
+  const navigations = screen.queryAllByTestId("pagination-item");
+
+  // should highlight current page
+  const selected = navigations.find(
+    (e) =>
+      e.getAttribute("aria-selected") === "true" &&
+      e.getAttribute("aria-description") === shopSimulate.state.pageIndex + ""
+  );
+  expect(selected).toBeTruthy();
+
+  // should show first and last page
+  const first = navigations.find(
+    (e) => e.getAttribute("aria-description") === "0"
+  );
+  expect(first).toBeTruthy();
+
+  const last = navigations.find(
+    (e) =>
+      e.getAttribute("aria-description") ===
+      shopSimulate.getPageCount() - 1 + ""
+  );
+  expect(last).toBeTruthy();
 }

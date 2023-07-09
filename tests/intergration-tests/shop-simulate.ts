@@ -24,7 +24,8 @@ export type ShopState = {
 //   pageSize: 20,
 // }
 // the current UI should show 10 products on screen that have "pepsi" in their name
-// and all products should belong to "Drink" category
+// and all products should belong to "Drink" category.
+// Also the pagination bar should reflect the pageIndex and pageSize
 export class ShopSimulate {
   private readonly _state: ShopState;
   private _allProducts: TProduct[];
@@ -115,5 +116,22 @@ export class ShopSimulate {
         isProductMatch(p, this._state.categoryId, this._state.search)
       )
       .slice(this._state.pageIndex * this._state.pageSize, this._state.count);
+  }
+
+  getPageCount() {
+    if (this.getTotal() === 0) return 1;
+    return Math.ceil(this.getTotal() / this.state.pageSize);
+  }
+
+  canGoNextPage() {
+    return this.canChangePageTo(this.state.pageIndex + 1);
+  }
+
+  getNextPage() {
+    return this.state.pageIndex + 1;
+  }
+
+  shouldPaginationBarVisible() {
+    return this.state.count > 0;
   }
 }

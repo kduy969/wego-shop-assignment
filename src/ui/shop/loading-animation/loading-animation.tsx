@@ -3,15 +3,27 @@ import css from "./loading-animation.module.scss";
 import { ViewStyle } from "../../base-types/view-style";
 import classNames from "classnames";
 
-type Props = ViewStyle & {};
+type Props = ViewStyle & {
+  size?: "normal" | "large";
+};
 
-const LoadingAnimation = ({ className }: Props) => {
+const LoadingAnimation = ({ className, size = "normal" }: Props) => {
   return (
     <div
       data-testid={"loading-icon"}
-      className={classNames(css.container, className)}
+      className={classNames(
+        css.container,
+        className,
+        size === "large" && css.large
+      )}
     >
-      <div className={classNames(css.dotFlashing, className)} />
+      <div
+        className={classNames(
+          css.dotFlashing,
+          className,
+          size === "large" && css.large
+        )}
+      />
     </div>
   );
 };

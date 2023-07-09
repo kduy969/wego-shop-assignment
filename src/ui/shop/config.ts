@@ -1,8 +1,8 @@
 import MobileDetect from "mobile-detect";
-const md = new MobileDetect(navigator.userAgent);
+import { WebUtils } from "../../utils/browser";
 
 export const ShopConfig = {
-  InitialTake: md.mobile() ? 10 : 20,
-  TakeOnLoadMore: md.mobile() ? 10 : 20,
-  PageSize: md.mobile() ? 40 : 40,
+  InitialTake: WebUtils.md.mobile() ? 10 : 20,
+  TakeOnLoadMore: WebUtils.md.mobile() ? 10 : 20,
+  PageSize: WebUtils.md.mobile() ? 40 : 40,
 };

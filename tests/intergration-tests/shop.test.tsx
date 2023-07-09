@@ -29,7 +29,7 @@ import {
 
 // setup environment for test
 import setupTest from "../../src/setup-test/index";
-import { ShopSimulate, ShopState } from "./shop-state";
+import { ShopSimulate, ShopState } from "./shop-simulate";
 import { ShopConfig } from "../../src/ui/shop/config";
 
 setupTest();
@@ -44,6 +44,15 @@ export const InitialShopState: ShopState = {
   count: ShopConfig.InitialTake,
   pageSize: ShopConfig.PageSize,
 };
+
+const originalOffsetHeight = Object.getOwnPropertyDescriptor(
+  HTMLElement.prototype,
+  "offsetHeight"
+);
+const originalOffsetWidth = Object.getOwnPropertyDescriptor(
+  HTMLElement.prototype,
+  "offsetWidth"
+);
 
 describe("Test common cases for shop", () => {
   beforeAll(() => {
@@ -177,9 +186,6 @@ describe("Test common cases for shop", () => {
       screen.queryByTestId("status-product-loading")
     );
 
-    // should show load more
-    expectToBeVisible("load-more");
-
     let shopSimulate = new ShopSimulate(
       {
         ...InitialShopState,
@@ -196,6 +202,7 @@ describe("Test common cases for shop", () => {
 
     await tryLoadNextPageThenCheck(shopSimulate);
 
+    // sushi category
     await changeCategoryThenCheck(shopSimulate, "6288a89f1f0152b8c2cd512b");
 
     await tryLoadMoreThenCheck(shopSimulate);
@@ -216,7 +223,7 @@ describe("Test edge cases for shop", () => {
   afterEach(() => {
     fetchMock.resetMocks();
   });
-  test("Test loading category and category fail", async () => {
+  test("Test load product and category fail", async () => {
     // mock fetch to fail all API
     mockAllAPIFail();
 
@@ -227,10 +234,8 @@ describe("Test edge cases for shop", () => {
       screen.queryByTestId("status-product-loading")
     );
 
-    // should not show any footer content
-    expectNotToBeVisible("load-more");
-    expectNotToBeVisible("no-more");
-    expectNotToBeVisible("next-page");
+    // should not show any content at footer
+    expectToBeVisible("bottom-empty-placeholder");
 
     // an error should be showed on the screen
     expectToBeVisible("product-error");
@@ -240,7 +245,7 @@ describe("Test edge cases for shop", () => {
     expect(categories.length).toBe(0);
   });
 
-  test("Test load more and retry fail", async () => {
+  test("Test load more fail and retry fail/success", async () => {
     mockAllAPISuccess();
     render(<Shop />);
 

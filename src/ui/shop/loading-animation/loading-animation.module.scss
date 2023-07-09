@@ -4,6 +4,12 @@ $dot-size: 6px;
 $container-size: $dot-size * 4;
 $left: $dot-size * 1.5 * -1;
 $right: $dot-size * 1.5;
+
+$dot-size-large: 8px;
+$container-size-large: $dot-size-large * 4;
+$left-large: $dot-size-large * 1.5 * -1;
+$right-large: $dot-size-large * 1.5;
+
 $color: #b7b7b7;
 $animation-time: 0.5s;
 $delay-left: $animation-time * 0;
@@ -16,6 +22,9 @@ $delay-right: $animation-time * 1;
   align-items: center;
   justify-content: center;
 }
+.container.large {
+  width: $container-size-large;
+}
 
 .dotFlashing {
   display: flex;
@@ -27,12 +36,18 @@ $delay-right: $animation-time * 1;
   animation: dot-flashing $animation-time infinite linear alternate;
   animation-delay: $delay-mid;
 }
+.dotFlashing.large {
+  width: $dot-size-large;
+  height: $dot-size-large;
+}
+
 .dotFlashing:before, .dotFlashing:after {
   content: "";
   display: inline-block;
   position: absolute;
   top: 0;
 }
+
 .dotFlashing:before {
   left: $left;
   width: $dot-size;
@@ -42,6 +57,11 @@ $delay-right: $animation-time * 1;
   animation: dot-flashing $animation-time infinite alternate;
   animation-delay: $delay-left;
 }
+.dotFlashing.large:before {
+  left: $left-large;
+  width: $dot-size-large;
+  height: $dot-size-large;
+}
 .dotFlashing:after {
   left: $right;
   width: $dot-size;
@@ -50,6 +70,11 @@ $delay-right: $animation-time * 1;
   background-color: $color;
   animation: dot-flashing $animation-time infinite alternate;
   animation-delay: $delay-right;
+}
+.dotFlashing.large:after {
+  left: $right-large;
+  width: $dot-size-large;
+  height: $dot-size-large;
 }
 
 @keyframes dot-flashing {

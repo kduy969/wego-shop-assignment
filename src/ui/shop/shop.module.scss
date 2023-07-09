@@ -16,11 +16,11 @@
 
 .searchBarBox {
   display: flex;
-  margin-top: 10px;
+  margin-top: 0.6rem;
 }
 
 .categoryBox {
-  margin-top: 40px;
+  margin-top: 2rem;
 }
 
 .productsBox {
@@ -29,11 +29,25 @@
   display: flex;
 }
 
-.loadMore {
+.bottom {
   display: flex;
+  flex: 0 0 auto;
+  height: 2rem;
+  margin-top: 0px;
+}
+
+.bottom.loading {
+  align-self: center;
+}
+
+// use this as a placeholder when there is no item to be displayed at the bottom
+.bottom.placeholder {
+  opacity: 1;
+}
+
+.bottom.loadMore {
   align-items: center;
   justify-content: center;
-  margin-top: 20px;
   align-self: center;
   border-radius: 10px;
   border: 2px solid $accent-color;
@@ -41,30 +55,50 @@
   color: $text-color;
   font-weight: bold;
   font-size: 0.7rem;
-  padding: 6px 0px;
   width: 130px;// fixed width to prevent size change on text update
   cursor: pointer;
   transition: opacity 0.2s ease;
   opacity: 0.85;
 }
 
-.loadMore:hover {
+.bottom.loadMore:hover {
   opacity: 1;
 }
 
-.noMore {
-  display: flex;
-  margin-top: 20px;
+.bottom.text {
   align-self: center;
   color: $text-color;
   font-size: 0.9rem;
 }
 
+.paginationSpace {
+  align-self: center;
+  display: flex;
+  height: 30px;
+  width: 100px;
+  flex: 0 0 auto;
+}
+
+.paginationBar {
+
+  align-self: center;
+  margin-top: 1rem;
+  display: flex;
+  position: fixed;
+  bottom: 0.4rem;
+  transition: transform 0.25s ease;
+  transform: translateY(0);
+}
+
+.paginationBar.hide {
+  transform: translateY(150%);
+}
+
 .bottomScroll {
   display: flex;
+  flex: 0 0 auto;
   align-self: center;
-  height: 20px;
-  width: 100px;
+  height: 10px;
 }
 
 

@@ -1,0 +1,50 @@
+@import '../style';
+
+$border-radius: 1rem;
+
+.wrapper {
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  border-radius: $border-radius;
+  background: white;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid $accent-color;
+}
+
+.item {
+  padding: 0;
+  width: 3rem;
+  height: 2.4rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: $text-color;
+  background: transparent;
+}
+
+.item:first-child {
+  border-bottom-left-radius: $border-radius;
+  border-top-left-radius: $border-radius;
+}
+
+.item:last-child {
+  border-bottom-right-radius: $border-radius;
+  border-top-right-radius: $border-radius;
+}
+
+.item.selectable {
+  cursor: pointer;
+}
+
+.item.selected {
+  font-weight: bold;
+  background: $accent-color;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
