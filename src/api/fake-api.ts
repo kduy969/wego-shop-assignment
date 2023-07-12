@@ -35,7 +35,7 @@ export class FakeApi implements ApiInterface {
       );
     }
 
-    // return result base on filtered list
+    // return result based on filtered list
     return {
       products: filteredProducts
         .map((p, index) => ({ ...p, index }))

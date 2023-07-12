@@ -1,10 +1,4 @@
-import React, {
-  RefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useRef, useState } from "react";
 import css from "./shop.module.scss";
 import { ShopConfig } from "./config";
 
@@ -14,12 +8,11 @@ import SearchBar from "./search-bar/search-bar";
 import CategoryList from "./category-list/category-list";
 import ProductList from "./product-list/product-list";
 
-import { useScrollTopOnNextPageLoaded } from "./hooks/use-scroll-top-on-next-page-loaded";
+import { useAutoScrollTopOnNewPageLoaded } from "./hooks/use-auto-scroll-top-on-new-page-loaded";
 import { useLoadMoreOnScrollBottom } from "./hooks/use-load-more-on-scroll-bottom";
 import PaginationBar from "./pagination-bar/pagination-bar";
 import classNames from "classnames";
 import { useScrollDirection } from "../../hooks/use-scroll-direction";
-import { WebUtils } from "../../utils/browser";
 import LoadingAnimation from "./loading-animation/loading-animation";
 
 type Props = {};
@@ -47,7 +40,6 @@ const Shop = ({}: Props) => {
     setPageIndex(page);
     setPageTake(ShopConfig.InitialTake);
   }, []);
-
   // endregion
 
   // region handle search
@@ -90,7 +82,7 @@ const Shop = ({}: Props) => {
   );
   // endregion
 
-  // user make takeMore/nextPage action lead to load product error -> show refresh button to allow user to retry
+  // "takeMore" action lead to load product error -> show refresh button to allow user to retry
   const showRetry = !!(loadingBy === "takeMore" && productError);
 
   const taken = products.length + pageIndex * pageSize;
@@ -103,7 +95,7 @@ const Shop = ({}: Props) => {
   useLoadMoreOnScrollBottom(scrollRef, autoLoadMore, onLoadMore);
 
   // auto scroll top when next page loaded
-  useScrollTopOnNextPageLoaded(
+  useAutoScrollTopOnNewPageLoaded(
     loadingProduct,
     loadingBy,
     productError,

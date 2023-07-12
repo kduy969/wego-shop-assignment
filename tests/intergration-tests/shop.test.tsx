@@ -10,7 +10,6 @@ import "@testing-library/jest-dom";
 import Shop from "../../src/ui/shop/shop";
 import { expectNotToBeVisible, expectToBeVisible } from "../utils";
 import fetchMock, { FetchMock } from "jest-fetch-mock";
-
 import { TestCategoryList, TestProductList } from "../test-data";
 
 import {
@@ -27,10 +26,11 @@ import {
   tryRetryFailThenCheck,
 } from "./shop.test.helper";
 
-// setup environment for test
-import setupTest from "../../src/setup-test/index";
 import { ShopSimulate, ShopState } from "./shop-simulate";
 import { ShopConfig } from "../../src/ui/shop/config";
+
+// setup environment for test
+import setupTest from "../../src/setup-test/index";
 
 setupTest();
 // enable mocking API
@@ -44,15 +44,6 @@ export const InitialShopState: ShopState = {
   count: ShopConfig.InitialTake,
   pageSize: ShopConfig.PageSize,
 };
-
-const originalOffsetHeight = Object.getOwnPropertyDescriptor(
-  HTMLElement.prototype,
-  "offsetHeight"
-);
-const originalOffsetWidth = Object.getOwnPropertyDescriptor(
-  HTMLElement.prototype,
-  "offsetWidth"
-);
 
 describe("Test common cases for shop", () => {
   beforeAll(() => {
@@ -223,6 +214,7 @@ describe("Test edge cases for shop", () => {
   afterEach(() => {
     fetchMock.resetMocks();
   });
+
   test("Test load product and category fail", async () => {
     // mock fetch to fail all API
     mockAllAPIFail();
